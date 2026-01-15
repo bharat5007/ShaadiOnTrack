@@ -26,7 +26,7 @@ async def get_budgets(
     return result
 
 
-@budget.get("/<id>", status_code=status.HTTP_200_OK)
+@budget.get("/{id}", status_code=status.HTTP_200_OK)
 async def get_budget_by_id(
     id: int,
     db: Session = Depends(get_db),
@@ -36,7 +36,7 @@ async def get_budget_by_id(
     return result
 
 
-@budget.put("/<id>", status_code=status.HTTP_200_OK)
+@budget.put("/{id}", status_code=status.HTTP_200_OK)
 async def update_budget(
     id: int,
     payload: dict,
@@ -47,7 +47,7 @@ async def update_budget(
     return result
 
 
-@budget.delete("/<id>", status_code=status.HTTP_200_OK)
+@budget.delete("/{id}", status_code=status.HTTP_200_OK)
 async def delete_budget(
     id: int,
     db: Session = Depends(get_db),
