@@ -40,7 +40,7 @@ class BudgetCategoryBase(BaseModel):
     budget_cat: Optional[int] = None
     budget_amt: Optional[int] = None
     actual_cost: Optional[int] = None
-    reaming: Optional[int] = None
+    remaining: Optional[int] = None
 
 
 class BudgetCategoryCreate(BudgetCategoryBase):
@@ -53,7 +53,7 @@ class BudgetCategoryUpdate(BaseModel):
     budget_cat: Optional[int] = None
     budget_amt: Optional[int] = None
     actual_cost: Optional[int] = None
-    reaming: Optional[int] = None
+    remaining: Optional[int] = None
 
 
 class BudgetCategoryResponse(BudgetCategoryBase):

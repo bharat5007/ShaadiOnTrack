@@ -26,11 +26,12 @@ class BudgetCategory(Base):
     __tablename__ = "budget_categories"
     
     id = Column(Integer, primary_key=True, index=True)
-    budget_id = Column(Integer, ForeignKey("wedding_core.id", ondelete="CASCADE"), nullable=False, index=True)
+    budget_id = Column(Integer, ForeignKey("budget.id", ondelete="CASCADE"), nullable=False, index=True)
     budget_cat = Column(Integer)
     budget_amt = Column(Integer)
     actual_cost = Column(Integer)
-    reaming = Column(Integer)
+    remaining = Column(Integer)
+    metadata = Column(dict)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     

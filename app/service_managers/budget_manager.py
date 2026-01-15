@@ -3,6 +3,7 @@ from sqlalchemy import select
 from app.models import Budget, BudgetCategory
 from fastapi import HTTPException, status
 from sqlalchemy.orm import selectinload
+from app.auth import get_user_id
 
 
 class BudgetManager:
@@ -56,7 +57,8 @@ class BudgetManager:
         return {"msg": "Budget updated"}
     
     @classmethod
-    async def get_budgets(cls, db: AsyncSession, user_id: str):
+    async def get_budgets(cls, db: AsyncSession):
+        user_id = get_user_id()
         if not user_id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -87,7 +89,7 @@ class BudgetManager:
                         "budget_cat": category.budget_cat,
                         "budget_amt": category.budget_amt,
                         "actual_cost": category.actual_cost,
-                        "remaining": category.reaming,
+                        "remaining": category.remaining,
                         "created_at": category.created_at,
                         "updated_at": category.updated_at
                     }
@@ -98,3 +100,111 @@ class BudgetManager:
             budgets_with_categories.append(budget_dict)
         
         return budgets_with_categories
+    
+    @classmethod
+    async def get_budget_by_id(cls, db: AsyncSession, id: int):
+        if not id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Budget ID is required"
+            )
+        
+        query = select(Budget).options(
+            selectinload(Budget.budget_categories)
+        ).filter(Budget.id == id)
+        
+        result = await db.execute(query)
+        budget = result.scalar_one_or_none()
+        
+        if not budget:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Budget with ID {id} not found"
+            )
+        
+        budget_dict = {
+            "id": budget.id,
+            "user_id": budget.user_id,
+            "name": budget.name,
+            "total_budget": budget.total_budget,
+            "spent_budget": budget.spent_budget,
+            "remaining_budget": (budget.total_budget or 0) - (budget.spent_budget or 0),
+            "created_at": budget.created_at,
+            "updated_at": budget.updated_at,
+            "budget_categories": [
+                {
+                    "id": category.id,
+                    "budget_cat": category.budget_cat,
+                    "budget_amt": category.budget_amt,
+                    "actual_cost": category.actual_cost,
+                    "remaining": category.remaining,
+                    "created_at": category.created_at,
+                    "updated_at": category.updated_at
+                }
+                for category in budget.budget_categories
+            ],
+            "categories_count": len(budget.budget_categories)
+        }
+        
+        return budget_dict
+    
+    @classmethod
+    async def update_budget(cls, db: AsyncSession, id: int, payload: dict):
+        if not id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Budget ID is required"
+            )
+        
+        # Check if budget exists
+        query = select(Budget).filter(Budget.id == id)
+        result = await db.execute(query)
+        budget = result.scalar_one_or_none()
+        
+        if not budget:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Budget with ID {id} not found"
+            )
+        
+        # Update budget fields
+        if "name" in payload:
+            budget.name = payload["name"]
+        if "total_budget" in payload:
+            budget.total_budget = payload["total_budget"]
+        if "spent_budget" in payload:
+            budget.spent_budget = payload["spent_budget"]
+        
+        await db.commit()
+        await db.refresh(budget)
+        
+        # Update budget categories if provided
+        if "budget_categories" in payload:
+            await cls.update_budget_categories(db, payload, budget_id=id)
+        
+        return {"msg": "Budget updated successfully", "budget_id": id}
+    
+    @classmethod
+    async def delete_budget(cls, db: AsyncSession, id: int):
+        if not id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Budget ID is required"
+            )
+        
+        # Check if budget exists
+        query = select(Budget).filter(Budget.id == id)
+        result = await db.execute(query)
+        budget = result.scalar_one_or_none()
+        
+        if not budget:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Budget with ID {id} not found"
+            )
+        
+        # Delete the budget (cascade will handle related categories)
+        await db.delete(budget)
+        await db.commit()
+        
+        return {"msg": f"Budget with ID {id} deleted successfully"}
