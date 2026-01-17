@@ -8,7 +8,7 @@ from app.routers import (
     weddings,
     service_categories,
     vendors,
-    vendor_media
+    # vendor_media
 )
 import logging
 
@@ -42,7 +42,11 @@ app.add_middleware(
 async def startup_event():
     """Create database tables on startup."""
     logger.info("Creating database tables...")
-    Base.metadata.create_all(bind=engine)
+
+    # engine is AsyncEngine, so DDL must be executed via run_sync
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
     logger.info("Database tables created successfully!")
 
 
@@ -86,9 +90,9 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 # Include routers
 app.include_router(weddings.router, prefix="/api/v1")
-app.include_router(budget.router, prefix="/api/v1")
+app.include_router(budget.budget, prefix="/api/v1")
 app.include_router(service_categories.router, prefix="/api/v1")
 app.include_router(vendors.router, prefix="/api/v1")
-app.include_router(vendor_media.router, prefix="/api/v1")
+# app.include_router(vendor_media.router, prefix="/api/v1")
 
 logger.info(f"Application started - {settings.SERVICE_NAME}")

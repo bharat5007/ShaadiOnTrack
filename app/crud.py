@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.crud_base import CRUDBase
 from app.models import (
-    WeddingCore,
+    Budget,
     BudgetCategory,
     ServiceCategory,
     Vendor,
@@ -11,7 +11,7 @@ from app.models import (
 )
 
 
-class CRUDWeddingCore(CRUDBase[WeddingCore]):
+class CRUDWeddingCore(CRUDBase[Budget]):
     """CRUD operations for Wedding Core."""
     
     def get_by_user(
@@ -20,16 +20,16 @@ class CRUDWeddingCore(CRUDBase[WeddingCore]):
         user_id: int,
         skip: int = 0,
         limit: int = 100
-    ) -> List[WeddingCore]:
+    ) -> List[Budget]:
         """Get all weddings for a specific user."""
-        return db.query(WeddingCore).filter(
-            WeddingCore.user_id == user_id
+        return db.query(Budget).filter(
+            Budget.user_id == user_id
         ).offset(skip).limit(limit).all()
     
     def count_by_user(self, db: Session, user_id: int) -> int:
         """Count weddings for a specific user."""
-        return db.query(WeddingCore).filter(
-            WeddingCore.user_id == user_id
+        return db.query(Budget).filter(
+            Budget.user_id == user_id
         ).count()
     
     def create_for_user(
@@ -37,7 +37,7 @@ class CRUDWeddingCore(CRUDBase[WeddingCore]):
         db: Session,
         user_id: int,
         obj_in: dict
-    ) -> WeddingCore:
+    ) -> Budget:
         """Create a wedding for a specific user."""
         obj_in["user_id"] = user_id
         return self.create(db, obj_in)
@@ -156,7 +156,7 @@ class CRUDBudgetVendorMap(CRUDBase[BudgetVendorMap]):
 
 
 # Create CRUD instances
-wedding_core_crud = CRUDWeddingCore(WeddingCore)
+wedding_core_crud = CRUDWeddingCore(Budget)
 budget_category_crud = CRUDBudgetCategory(BudgetCategory)
 service_category_crud = CRUDServiceCategory(ServiceCategory)
 vendor_crud = CRUDVendor(Vendor)

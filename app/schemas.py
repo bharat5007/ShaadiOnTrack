@@ -201,14 +201,14 @@ class PaginatedResponse(BaseModel):
 class VendorQueryParams(BaseModel):
     skip: int = Field(0, ge=0)
     limit: int = Field(100, ge=1, le=100)
-    service_name: str | None = None
-    name: str | None = None
+    service_name: Optional[str]
+    name: Optional[str]
     
 class VendorUpdate(BaseModel):
-    name: str | None = None
-    id: int | None = None
+    name: Optional[str]
+    id: Optional[int]
     metadata: dict
     
 class VendorDeactivate(BaseModel):
-    name: str | None = None
-    id: int | None = None
+    name: Optional[str] = None
+    id: Optional[int] = None

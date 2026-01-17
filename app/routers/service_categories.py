@@ -10,7 +10,7 @@ from app.schemas import (
 )
 from app.service_managers.service_categories_manager import ServiceCategoriesManagerAsync
 
-router = APIRouter(prefix="/service-categories-async", tags=["service-categories-async"])
+router = APIRouter(prefix="/service-categories", tags=["service-categories"])
 
 
 @router.post("/", response_model=ServiceCategoryResponse, status_code=status.HTTP_201_CREATED)

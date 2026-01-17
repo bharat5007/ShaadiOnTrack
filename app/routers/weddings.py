@@ -10,7 +10,7 @@ from app.schemas import (
     PaginatedResponse
 )
 from app.crud import wedding_core_crud
-from app.models import WeddingCore
+from app.models import Budget
 
 router = APIRouter(prefix="/weddings", tags=["weddings"])
 
