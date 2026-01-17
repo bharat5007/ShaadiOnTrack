@@ -3,28 +3,34 @@ from sqlalchemy import select
 from app.models import ServiceCategory, Vendor, VendorMedia
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import selectinload
+from app.schemas import VendorQueryParams, VendorCreate
+
 
 
 class VendorManager:
     
     @classmethod
-    async def create_vendor(cls, db: AsyncSession, payload):
-        name = payload.get("name")
-        phone1 = payload.get("phone1")
-        phone2 = payload.get("phone2")
-        email = payload.get("email")
-        metadata = payload.get("metadata")
-        service_type = payload.get("service_type")
+    async def create_vendor(cls, db: AsyncSession, payload: VendorCreate):
+        name = payload.name
+        phone1 = payload.phone1
+        phone2 = payload.phone2
+        email = payload.email
+        lower_range = payload.lower_range
+        upper_range = payload.upper_range
+        metadata = payload.meta
+        service_type = payload.service_type
         
         stmt = select(ServiceCategory).filter(ServiceCategory.name == service_type)
         service_category = await db.execute(stmt)
+        service_category = service_category.scalar_one_or_none()
         
         if not service_category:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Invalid Service Category",
                 )
-                
+        
+        print(f"<<<<<<<<<<<<<<<<<<<<<<<<< {service_category}")
         service_id = service_category.id
         
         new_category = Vendor(
@@ -32,7 +38,10 @@ class VendorManager:
             phone1=phone1,
             phone2=phone2,
             email=email,
-            metadata=metadata,
+            lower_range=lower_range,
+            upper_range=upper_range,
+            meta=metadata,
+            service_category_id=service_id
         )
         
         db.add(new_category)
@@ -45,24 +54,32 @@ class VendorManager:
     # async def update_vendor_media(cls, db: AsyncSession, payload)
     
     @classmethod
-    async def get_vendors(cls, db: AsyncSession, params: dict):
-        skip = params.get("skip", 0)
-        limit = params.get("limit", 25)
-        service_name = params.get("service_name")
-        name = params.get("name")
+    async def get_vendors(cls, db: AsyncSession, params: VendorQueryParams):
+        skip = params.skip
+        limit = params.limit
+        service_name = params.service_name
+        name = params.name
+        service_id = int(params.service_id) if params.service_id else None
+        vendor_id = int(params.vendor_id) if params.vendor_id else None
         
         query = select(Vendor).options(selectinload(Vendor.vendor_media))
         
         # Filter by service category name if provided
         if service_name:
-            query = query.join(
-                ServiceCategory, 
-                Vendor.service_categories == ServiceCategory.id
-            ).filter(ServiceCategory.name.ilike(f"%{service_name}%"), Vendor.is_active == True)
+            stmt = select(ServiceCategory).filter(ServiceCategory.name == service_name)
+            service_category = await db.execute(stmt)
+            service_category = service_category.scalar_one_or_none()
+            service_id = service_category.id
         
         # Filter by vendor name if provided
-        if name:
-            query = query.filter(Vendor.name.ilike(f"%{name}%"))
+        elif name:
+            query = query.filter(Vendor.name.ilike(f"%{name}%"), Vendor.is_active == True)
+            
+        elif service_id:
+            query = query.filter(Vendor.service_category_id == service_id, Vendor.is_active == True)
+            
+        elif vendor_id:
+            query = query.filter(Vendor.id == vendor_id, Vendor.is_active == True)
         
         query = query.offset(skip).limit(limit)
         result = await db.execute(query)
@@ -73,20 +90,21 @@ class VendorManager:
             vendor_dict = {
                 "id": vendor.id,
                 "name": vendor.name,
-                "phones": vendor.phones,
+                "phone1": vendor.phone1,
+                "phone2": vendor.phone2,
                 "address": vendor.address,
-                "emails": vendor.emails,
-                "metadatas": vendor.metadatas,
-                "service_categories": vendor.service_categories,
+                "lower_range": vendor.lower_range,
+                "upper_range": vendor.upper_range,
+                "email": vendor.email,
+                "meta": vendor.meta,
                 "created_at": vendor.created_at,
                 "updated_at": vendor.updated_at,
                 "vendor_media": [
                     {
                         "id": media.id,
                         "media_type": media.media_type,
-                        "type": media.type,
-                        "created_at": media.created_at,
-                        "updated_at": media.updated_at
+                        "url": media.url,
+                        # "created_at": media.created_at,
                     }
                     for media in vendor.vendor_media
                 ]

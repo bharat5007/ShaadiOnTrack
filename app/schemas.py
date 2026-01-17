@@ -71,7 +71,10 @@ class BudgetCategoryResponse(BudgetCategoryBase):
 class ServiceCategoryBase(BaseModel):
     """Base schema for Service Category."""
     name: str = Field(..., min_length=1, max_length=255)
-    meta: Optional[str] = None
+    short_desc: str
+    description: str
+    percentage: int = None
+    meta: Optional[dict] = None
 
 
 class ServiceCategoryCreate(ServiceCategoryBase):
@@ -99,16 +102,22 @@ class ServiceCategoryResponse(ServiceCategoryBase):
 class VendorBase(BaseModel):
     """Base schema for Vendor."""
     name: str = Field(..., min_length=1, max_length=255)
-    phones: Optional[str] = Field(None, max_length=255)
     address: Optional[str] = Field(None, max_length=500)
     emails: Optional[str] = Field(None, max_length=255)
-    metadatas: Optional[str] = None
+    meta: Optional[str] = None
     service_categories: Optional[int] = None
 
 
 class VendorCreate(VendorBase):
-    """Schema for creating a vendor."""
-    pass
+    name: str = Field(..., min_length=1, max_length=255)
+    phone1: str = Field(max_length=255)
+    phone2: Optional[str] = Field(max_length=255)
+    address: str = Field(max_length=500)
+    email: Optional[str] = Field(max_length=255)
+    lower_range: int
+    upper_range: int
+    meta: Optional[dict] = None
+    service_type: str
 
 
 class VendorUpdate(BaseModel):
@@ -201,8 +210,10 @@ class PaginatedResponse(BaseModel):
 class VendorQueryParams(BaseModel):
     skip: int = Field(0, ge=0)
     limit: int = Field(100, ge=1, le=100)
-    service_name: Optional[str]
-    name: Optional[str]
+    service_name: Optional[str] = None
+    service_id: Optional[str] = None
+    name: Optional[str] = None
+    vendor_id: Optional[str] = None
     
 class VendorUpdate(BaseModel):
     name: Optional[str]

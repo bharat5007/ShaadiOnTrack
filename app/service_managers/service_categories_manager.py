@@ -1,14 +1,21 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.models import ServiceCategory
+from app.schemas import (
+    ServiceCategoryCreate,
+    ServiceCategoryUpdate,
+    ServiceCategoryResponse
+)
 
 
 class ServiceCategoriesManagerAsync:
     
     @classmethod
-    async def create_service_category(cls, db: AsyncSession, payload: dict):
-        name = payload.get("name")
-        metadata = payload.get("metadata")
+    async def create_service_category(cls, db: AsyncSession, payload: ServiceCategoryCreate):
+        name = payload.name
+        metadata = payload.meta
+        description = payload.description
+        short_desc = payload.short_desc
         
         stmt = select(ServiceCategory).filter(ServiceCategory.name == name)
         result = await db.execute(stmt)
@@ -16,6 +23,8 @@ class ServiceCategoriesManagerAsync:
         
         if existing_service:
             existing_service.meta = metadata
+            existing_service.description = description
+            existing_service.short_desc = short_desc
             await db.commit()
             await db.refresh(existing_service)
             return {"msg": "Service Category updated", "id": existing_service.id}
@@ -23,6 +32,8 @@ class ServiceCategoriesManagerAsync:
         # Create new category
         new_category = ServiceCategory(
             name=name,
+            short_desc=short_desc,
+            description=description,
             meta=metadata
         )
         

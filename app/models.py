@@ -59,6 +59,9 @@ class ServiceCategory(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), nullable=False)
+    short_desc = Column(String, nullable=False)
+    description = Column(String, nullable=False)
+    percentage = Column(Integer)
     meta = Column(JSON)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -73,12 +76,15 @@ class Vendor(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), nullable=False)
-    phones = Column(String(255))
+    phone1 = Column(String(20))
+    phone2 = Column(String(20))
     address = Column(String(500))
-    emails = Column(String(255))
+    email = Column(String(255), nullable=True)
+    lower_range = Column(Integer)
+    upper_range = Column(Integer)
     meta = Column(JSON)
     is_active = Column(Boolean, default=True)
-    service_categories = Column(Integer, ForeignKey("service_categories.id"), index=True)
+    service_category_id = Column(Integer, ForeignKey("service_categories.id"), index=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -95,8 +101,8 @@ class VendorMedia(Base):
     id = Column(Integer, primary_key=True, index=True)
     vendor_id = Column(Integer, ForeignKey("vendors.id", ondelete="CASCADE"), nullable=False, index=True)
     media_type = Column(String(50))
-    type = Column(String(100))
     meta = Column(JSON)
+    url = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

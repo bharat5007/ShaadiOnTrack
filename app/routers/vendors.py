@@ -4,7 +4,7 @@ from app.database import get_db
 from app.schemas import (
     VendorUpdate,
     VendorQueryParams,
-    VendorUpdate,
+    VendorCreate,
     VendorDeactivate
 )
 from app.service_managers.vendor_manager import VendorManager
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/vendors", tags=["vendors"])
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_vendor(
-    payload: dict,
+    payload: VendorCreate,
     db: Session = Depends(get_db),
 ):
 
@@ -29,7 +29,7 @@ async def list_vendors(
 ):
     vendors = await VendorManager.get_vendors(
         db=db, 
-        params=params.model_dump()
+        params=params
     )
     return vendors
 

@@ -13,24 +13,23 @@ from app.service_managers.service_categories_manager import ServiceCategoriesMan
 router = APIRouter(prefix="/service-categories", tags=["service-categories"])
 
 
-@router.post("/", response_model=ServiceCategoryResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_service_category(
-    service_category: ServiceCategoryCreate,
+    payload: ServiceCategoryCreate,
     db: AsyncSession = Depends(get_async_db),
-    current_user: dict = Depends(get_current_active_user)
+    # current_user: dict = Depends(get_current_active_user)
 ):
 
-    payload = service_category.model_dump()
     result = await ServiceCategoriesManagerAsync.create_service_category(db, payload)
     return result
 
 
-@router.get("/", response_model=List[ServiceCategoryResponse])
+@router.get("/")
 async def list_service_categories(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=100),
     db: AsyncSession = Depends(get_async_db),
-    current_user: dict = Depends(get_current_active_user)
+    # current_user: dict = Depends(get_current_active_user)
 ):
 
     categories = await ServiceCategoriesManagerAsync.get_all_service_categories(db, skip, limit)
