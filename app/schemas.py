@@ -112,6 +112,8 @@ class VendorCreate(VendorBase):
     name: str = Field(..., min_length=1, max_length=255)
     phone1: str = Field(max_length=255)
     phone2: Optional[str] = Field(max_length=255)
+    city: str
+    district: str
     address: str = Field(max_length=500)
     email: Optional[str] = Field(max_length=255)
     lower_range: int

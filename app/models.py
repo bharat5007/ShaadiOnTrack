@@ -78,6 +78,8 @@ class Vendor(Base):
     name = Column(String(255), nullable=False)
     phone1 = Column(String(20))
     phone2 = Column(String(20))
+    city = Column(String)
+    district = Column(String)
     address = Column(String(500))
     email = Column(String(255), nullable=True)
     lower_range = Column(Integer)

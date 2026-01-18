@@ -17,10 +17,13 @@ class VendorManager:
         email = payload.email
         lower_range = payload.lower_range
         upper_range = payload.upper_range
+        address = payload.address
+        city = payload.city
+        district = payload.district
         metadata = payload.meta
-        service_type = payload.service_type
+        service_type = int(payload.service_type)
         
-        stmt = select(ServiceCategory).filter(ServiceCategory.name == service_type)
+        stmt = select(ServiceCategory).filter(ServiceCategory.id == service_type)
         service_category = await db.execute(stmt)
         service_category = service_category.scalar_one_or_none()
         
@@ -38,6 +41,9 @@ class VendorManager:
             phone1=phone1,
             phone2=phone2,
             email=email,
+            address=address,
+            city=city,
+            district=district,
             lower_range=lower_range,
             upper_range=upper_range,
             meta=metadata,
@@ -48,7 +54,7 @@ class VendorManager:
         await db.commit()
         await db.refresh(new_category)
         
-        return {"msg": "Category successfully created", "id": new_category.id}
+        return {"msg": "Once verified you will be on the list"}
     
     # @classmethod
     # async def update_vendor_media(cls, db: AsyncSession, payload)
