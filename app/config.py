@@ -27,6 +27,8 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     JWT_TOKEN_EXPIRE_MINUTES: int = 30
     
+    SHARED_CONTEXT_SECRET: str = "your-shared-context-secret-change-in-production"
+    
     class Config:
         env_file = ".env"
         case_sensitive = True

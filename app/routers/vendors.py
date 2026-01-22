@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Request
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.schemas import (
@@ -8,6 +8,7 @@ from app.schemas import (
     VendorDeactivate
 )
 from app.service_managers.vendor_manager import VendorManager
+from app.utils import require_auth
 
 router = APIRouter(prefix="/vendors", tags=["vendors"])
 
@@ -23,10 +24,13 @@ async def create_vendor(
 
 
 @router.get("/")
+@require_auth
 async def list_vendors(
+    request: Request,
     params: VendorQueryParams = Depends(),
     db: Session = Depends(get_db)
 ):
+    user = request.state.user
     vendors = await VendorManager.get_vendors(
         db=db, 
         params=params
