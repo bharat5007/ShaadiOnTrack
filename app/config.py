@@ -21,6 +21,15 @@ class Settings(BaseSettings):
     # Auth Service Configuration
     AUTH_SERVICE_URL: str = "http://localhost:8001"
     AUTH_SERVICE_TIMEOUT: int = 10
+
+    # Token used by this service when calling auth-service (service-to-service auth)
+    # IMPORTANT: keep this secret, rotate regularly, and never log it.
+    AUTH_SERVICE_TOKEN: str = "auth_service"
+    
+    # Header format used for auth-service calls
+    # Example: header=Authorization, prefix=Bearer -> "Authorization: Bearer <base64(token)>"
+    AUTH_SERVICE_TOKEN_HEADER: str = "Authorization"
+    AUTH_SERVICE_TOKEN_PREFIX: str = "Bearer"
     
     # JWT Configuration
     JWT_SECRET_KEY: str = "your-secret-key-here"

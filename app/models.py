@@ -78,6 +78,7 @@ class Vendor(Base):
     name = Column(String(255), nullable=False)
     phone1 = Column(String(20))
     phone2 = Column(String(20))
+    username = Column(String)
     city = Column(String)
     district = Column(String)
     address = Column(String(500))

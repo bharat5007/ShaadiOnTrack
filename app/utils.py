@@ -14,7 +14,7 @@ class SharedContext(BaseModel):
     user_id: int
     phone: str
     email: str
-    role: str
+    roles: list
     is_active: bool
 
 
@@ -57,7 +57,6 @@ def decode_shared_context(encoded_context: str) -> Optional[SharedContext]:
     if encoded_context.startswith('Bearer '):
         encoded_context = encoded_context[7:].strip()
     
-    print(f"<<<<<<<<<<<<<<<<<<<< {encoded_context}")
     try:
         # Decode and verify JWT signature
         payload = jwt.decode(
@@ -78,7 +77,7 @@ def decode_shared_context(encoded_context: str) -> Optional[SharedContext]:
             'user_id': payload.get('uid'),
             'phone': payload.get('phone'),
             'email': payload.get('email'),
-            'role': payload.get('role'),
+            'roles': payload.get('roles'),
             'is_active': True  # Auth service doesn't send this, default to True
         }
         

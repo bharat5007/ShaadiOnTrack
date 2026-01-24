@@ -4,17 +4,19 @@ from app.models import ServiceCategory, Vendor, VendorMedia
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import selectinload
 from app.schemas import VendorQueryParams, VendorCreate
+from app.service.auth import AuthServiceClient
 
 
 
 class VendorManager:
     
     @classmethod
-    async def create_vendor(cls, db: AsyncSession, payload: VendorCreate):
+    async def create_vendor(cls, db: AsyncSession, payload: VendorCreate, user: object):
         name = payload.name
         phone1 = payload.phone1
         phone2 = payload.phone2
         email = payload.email
+        username = user.user_id
         lower_range = payload.lower_range
         upper_range = payload.upper_range
         address = payload.address
@@ -33,7 +35,6 @@ class VendorManager:
                     detail="Invalid Service Category",
                 )
         
-        print(f"<<<<<<<<<<<<<<<<<<<<<<<<< {service_category}")
         service_id = service_category.id
         
         new_category = Vendor(
@@ -41,6 +42,7 @@ class VendorManager:
             phone1=phone1,
             phone2=phone2,
             email=email,
+            username=str(username),
             address=address,
             city=city,
             district=district,
@@ -49,8 +51,11 @@ class VendorManager:
             meta=metadata,
             service_category_id=service_id
         )
-        
         db.add(new_category)
+        
+        vendor_update_payload = {"phone": phone1}
+        await AuthServiceClient.update_vendor_role(vendor_update_payload)
+    
         await db.commit()
         await db.refresh(new_category)
         
