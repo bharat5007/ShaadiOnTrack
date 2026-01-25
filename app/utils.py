@@ -80,7 +80,6 @@ def decode_shared_context(encoded_context: str) -> Optional[SharedContext]:
             'roles': payload.get('roles'),
             'is_active': True  # Auth service doesn't send this, default to True
         }
-        
         return SharedContext(**shared_data)
     except Exception as e:
         # Log the error for debugging (remove in production)

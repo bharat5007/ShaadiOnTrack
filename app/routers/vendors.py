@@ -40,6 +40,21 @@ async def list_vendors(
     return vendors
 
 
+@router.get("/user_id")
+@require_auth
+async def list_vendors(
+    request: Request,
+    params: VendorQueryParams = Depends(),
+    db: Session = Depends(get_db)
+):
+    user = request.state.user
+    vendors = await VendorManager.get_vendors(
+        db=db, 
+        user=user
+    )
+    return vendors
+
+
 @router.put("/update")
 async def update_vendor(
     payload: VendorUpdate = Depends(),

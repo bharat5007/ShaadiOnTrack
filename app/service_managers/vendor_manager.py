@@ -49,7 +49,7 @@ class VendorManager:
             lower_range=lower_range,
             upper_range=upper_range,
             meta=metadata,
-            service_category_id=service_id
+            service_category_id=service_id,
         )
         db.add(new_category)
         
@@ -65,15 +65,19 @@ class VendorManager:
     # async def update_vendor_media(cls, db: AsyncSession, payload)
     
     @classmethod
-    async def get_vendors(cls, db: AsyncSession, params: VendorQueryParams):
-        skip = params.skip
-        limit = params.limit
-        service_name = params.service_name
-        name = params.name
-        service_id = int(params.service_id) if params.service_id else None
-        vendor_id = int(params.vendor_id) if params.vendor_id else None
+    async def get_vendors(cls, db: AsyncSession, params: VendorQueryParams = None, user: object = None):
+        skip = params.skip if params else 0
+        limit = params.limit if params else 1
+        service_name = params.service_name if params else None
+        name = params.name if params else None
+        service_id = int(params.service_id) if params else None
+        vendor_id = int(params.vendor_id) if params else None
+        user_id = str(user.user_id) if user and user.user_id else None
         
-        query = select(Vendor).options(selectinload(Vendor.vendor_media))
+        query = select(Vendor).options(
+            selectinload(Vendor.vendor_media),
+            selectinload(Vendor.service_category)
+        )
         
         # Filter by service category name if provided
         if service_name:
@@ -91,6 +95,9 @@ class VendorManager:
             
         elif vendor_id:
             query = query.filter(Vendor.id == vendor_id, Vendor.is_active == True)
+            
+        elif user_id:
+            query = query.filter(Vendor.username == user_id, Vendor.is_active == True)
         
         query = query.offset(skip).limit(limit)
         result = await db.execute(query)
@@ -103,6 +110,8 @@ class VendorManager:
                 "name": vendor.name,
                 "phone1": vendor.phone1,
                 "phone2": vendor.phone2,
+                "city": vendor.city,
+                "district": vendor.district,
                 "address": vendor.address,
                 "lower_range": vendor.lower_range,
                 "upper_range": vendor.upper_range,
@@ -110,6 +119,10 @@ class VendorManager:
                 "meta": vendor.meta,
                 "created_at": vendor.created_at,
                 "updated_at": vendor.updated_at,
+                "service_category": {
+                    "id": vendor.service_category.id,
+                    "name": vendor.service_category.name,
+                } if vendor.service_category else None,
                 "vendor_media": [
                     {
                         "id": media.id,

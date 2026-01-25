@@ -216,6 +216,7 @@ class VendorQueryParams(BaseModel):
     service_id: Optional[str] = None
     name: Optional[str] = None
     vendor_id: Optional[str] = None
+    user_id: Optional[str] = None
     
 class VendorUpdate(BaseModel):
     name: Optional[str]
