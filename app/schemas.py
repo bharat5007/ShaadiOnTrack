@@ -213,15 +213,21 @@ class VendorQueryParams(BaseModel):
     skip: int = Field(0, ge=0)
     limit: int = Field(100, ge=1, le=100)
     service_name: Optional[str] = None
-    service_id: Optional[str] = None
+    service_id: Optional[int] = None
     name: Optional[str] = None
-    vendor_id: Optional[str] = None
+    vendor_id: Optional[int] = None
     user_id: Optional[str] = None
     
 class VendorUpdate(BaseModel):
-    name: Optional[str]
-    id: Optional[int]
-    metadata: dict
+    name: str = Field(..., min_length=1, max_length=255)
+    phone2: Optional[str] = Field(None, max_length=255)
+    email: Optional[str] = Field(None, max_length=255)
+    city: str
+    district: str
+    address: str = Field(max_length=500)
+    lower_range: int
+    upper_range: int
+    meta: Optional[dict] = None
     
 class VendorDeactivate(BaseModel):
     name: Optional[str] = None

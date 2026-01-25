@@ -56,12 +56,14 @@ async def list_vendors(
 
 
 @router.put("/update")
+@require_auth
 async def update_vendor(
-    payload: VendorUpdate = Depends(),
+    request: Request,
+    payload: VendorUpdate,
     db: Session = Depends(get_db),
 ):
-
-    response = await VendorManager.update_vendor(db=db, payload=payload.model_dump())
+    user = request.state.user
+    response = await VendorManager.update_vendor(db=db, payload=payload, user=user)
     return response
 
 @router.put("/deactivate")

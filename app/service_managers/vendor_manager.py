@@ -3,7 +3,7 @@ from sqlalchemy import select
 from app.models import ServiceCategory, Vendor, VendorMedia
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import selectinload
-from app.schemas import VendorQueryParams, VendorCreate
+from app.schemas import VendorQueryParams, VendorCreate, VendorUpdate
 from app.service.auth import AuthServiceClient
 
 
@@ -70,8 +70,8 @@ class VendorManager:
         limit = params.limit if params else 1
         service_name = params.service_name if params else None
         name = params.name if params else None
-        service_id = int(params.service_id) if params else None
-        vendor_id = int(params.vendor_id) if params else None
+        service_id = params.service_id if params else None
+        vendor_id = params.vendor_id if params else None
         user_id = str(user.user_id) if user and user.user_id else None
         
         query = select(Vendor).options(
@@ -138,40 +138,35 @@ class VendorManager:
         return vendors_with_media
     
     @classmethod
-    async def fetch_vendor(cls, db: AsyncSession, payload: dict):
-        name = payload.get("name")
-        id = payload.get("id")
+    async def fetch_vendor(cls, db: AsyncSession, name: str=None, id: str=None):
 
         if not (name or id):
             return {"msg": "Name/Id missing"}
         
         query = select(Vendor)
-        if name:
-            query = query.filter(Vendor.name == name, Vendor.is_active == True)
+        if id:
+            query = query.filter(Vendor.username == str(id), Vendor.is_active == True)
         else:
-            query.filter(Vendor.id == id)
+            query = query.filter(Vendor.name == name, Vendor.is_active == True)
         
-        vendor = await db.execute(query)
+        result = await db.execute(query)
+        vendor = result.scalars().all() if result else None
         return vendor
     
     @classmethod
-    async def update_vendor(cls, db: AsyncSession, payload: dict):
-        vendor = await cls.fetch_vendor(db, payload)
-        if not vendor:
-            return {"msg": f"No vendor found"}
+    async def update_vendor(cls, db: AsyncSession, payload: VendorUpdate, user: object):
+        user_id = user.user_id
+        vendor_data = await cls.fetch_vendor(db=db, id=user_id)
+        if not vendor_data:
+            raise HTTPException(status_code=404, detail="Vendor not found")
         
-        metadata = payload.get("metadata", {})
-        if metadata.get("phone1"):
-            vendor.phone1 = metadata.get("phone1")
+        vendor = vendor_data[0]
         
-        if metadata.get("phone2"):
-            vendor.phone2 = metadata.get("phone2")
+        update_data = payload.model_dump(exclude_unset=True, exclude={"id"})
+        for field, value in update_data.items():
+            if hasattr(vendor, field):
+                setattr(vendor, field, value)
         
-        if metadata.get("email"):
-            vendor.email = metadata.get("email")
-            
-        if metadata.get("metadata"):
-            vendor.metadata = metadata.get("metadata")
             
         await db.commit()
         await db.refresh(vendor)
