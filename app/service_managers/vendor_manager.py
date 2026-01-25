@@ -59,7 +59,27 @@ class VendorManager:
         await db.commit()
         await db.refresh(new_category)
         
-        return {"msg": "Once verified you will be on the list"}
+        # Return vendor data in same format as get_vendors
+        return {
+            "id": new_category.id,
+            "name": new_category.name,
+            "phone1": new_category.phone1,
+            "phone2": new_category.phone2,
+            "city": new_category.city,
+            "district": new_category.district,
+            "address": new_category.address,
+            "lower_range": new_category.lower_range,
+            "upper_range": new_category.upper_range,
+            "email": new_category.email,
+            "meta": new_category.meta,
+            "created_at": new_category.created_at,
+            "updated_at": new_category.updated_at,
+            "service_category": {
+                "id": service_category.id,
+                "name": service_category.name,
+            },
+            "vendor_media": []  # New vendor has no media yet
+        }
     
     # @classmethod
     # async def update_vendor_media(cls, db: AsyncSession, payload)

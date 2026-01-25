@@ -13,7 +13,7 @@ from app.config import settings
 class SharedContext(BaseModel):
     user_id: int
     phone: str
-    email: str
+    email: Optional[str] = None
     roles: list
     is_active: bool
 
@@ -73,6 +73,7 @@ def decode_shared_context(encoded_context: str) -> Optional[SharedContext]:
         # Map fields from auth service JWT to SharedContext
         # Auth sends: uid, email, phone, role
         # We need: user_id, username, email, role, is_active
+        print(f"<<<<<<<<<< {payload}")
         shared_data = {
             'user_id': payload.get('uid'),
             'phone': payload.get('phone'),

@@ -8,6 +8,7 @@ from app.routers import (
     weddings,
     service_categories,
     vendors,
+    s3,
     # vendor_media
 )
 import logging
@@ -93,6 +94,7 @@ app.include_router(weddings.router, prefix="/api/v1")
 app.include_router(budget.budget, prefix="/api/v1")
 app.include_router(service_categories.router, prefix="/api/v1")
 app.include_router(vendors.router, prefix="/api/v1")
+app.include_router(s3.router, prefix="/api/v1")
 # app.include_router(vendor_media.router, prefix="/api/v1")
 
 logger.info(f"Application started - {settings.SERVICE_NAME}")

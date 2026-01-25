@@ -232,3 +232,20 @@ class VendorUpdate(BaseModel):
 class VendorDeactivate(BaseModel):
     name: Optional[str] = None
     id: Optional[int] = None
+
+
+# S3 Upload Schemas
+class S3UploadUrlRequest(BaseModel):
+    """Request schema for generating S3 presigned upload URL."""
+    file_name: str
+    file_type: str
+    media_type: str
+    vendor_id: Optional[int]
+
+
+class S3UploadUrlResponse(BaseModel):
+    """Response schema containing presigned URL and metadata."""
+    upload_url: str = Field(..., description="Presigned URL for uploading the file to S3")
+    file_key: str = Field(..., description="S3 key/path where file will be stored")
+    public_url: str = Field(..., description="Public URL to access the file after upload")
+    expire_in: int = Field(..., description="Upload URL expiry time in seconds")
