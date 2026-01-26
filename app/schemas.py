@@ -249,3 +249,24 @@ class S3UploadUrlResponse(BaseModel):
     file_key: str = Field(..., description="S3 key/path where file will be stored")
     public_url: str = Field(..., description="Public URL to access the file after upload")
     expire_in: int = Field(..., description="Upload URL expiry time in seconds")
+
+
+# Vendor Media Update Schemas
+class MediaItem(BaseModel):
+    """Schema for individual media item."""
+    content_type: str
+    file_name: str
+    file_size: int
+    public_url: str
+
+
+class UpdateMediaRequest(BaseModel):
+    """Request schema for updating vendor media."""
+    media: List[MediaItem] = Field(..., description="List of media items to add")
+
+
+class UpdateMediaResponse(BaseModel):
+    """Response schema for media update."""
+    message: str
+    vendor_id: int
+    media_count: int

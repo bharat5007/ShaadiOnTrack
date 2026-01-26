@@ -42,19 +42,19 @@ class S3Manager:
         )
 
         public_url = f"https://{settings.S3_BUCKET_NAME}.s3.{settings.AWS_REGION}.amazonaws.com/{key}"
-        meta = {
-            "file_name": file_name,
-            "file_size": file_size
-        }
+        # meta = {
+        #     "file_name": file_name,
+        #     "file_size": file_size
+        # }
         
-        vendor_media = VendorMedia(
-            vendor_id=vendor_id,
-            media_type=content_type,
-            meta=meta,
-            url=public_url,
-        )
-        db.add(vendor_media)
-        await db.commit()
+        # vendor_media = VendorMedia(
+        #     vendor_id=vendor_id,
+        #     media_type=content_type,
+        #     meta=meta,
+        #     url=public_url,
+        # )
+        # db.add(vendor_media)
+        # await db.commit()
 
         return {
             "upload_url": url,

@@ -204,3 +204,49 @@ class VendorManager:
         await db.refresh(vendor)
         
         return {"msg": "Vendor deactivated"}
+    
+    @classmethod
+    async def update_vendor_media(cls, db: AsyncSession, media_items: list, user: object):
+        user_id = user.user_id
+        
+        query = select(Vendor).filter(Vendor.username == str(user_id), Vendor.is_active == True)
+        result = await db.execute(query)
+        vendor = result.scalars().first() if result else None
+        
+        if not vendor:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Vendor not found for user: {user_id}"
+            )
+        
+        vendor_id = vendor.id
+        
+        # Create vendor media records for each item
+        created_media = []
+        for item in media_items:
+            meta = {
+                "file_name": item["file_name"],
+                "file_size": item["file_size"]
+            }
+            content_type = 'image' if item["content_type"].startswith('image/') else 'video'
+            
+            vendor_media = VendorMedia(
+                vendor_id=vendor_id,
+                media_type=content_type,
+                meta=meta,
+                url=item["public_url"]
+            )
+            db.add(vendor_media)
+            created_media.append(vendor_media)
+        
+        await db.commit()
+        
+        # Refresh all created media records
+        for media in created_media:
+            await db.refresh(media)
+        
+        return {
+            "message": "Vendor media updated successfully",
+            "vendor_id": vendor_id,
+            "media_count": len(created_media)
+        }

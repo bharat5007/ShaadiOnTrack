@@ -5,7 +5,9 @@ from app.schemas import (
     VendorUpdate,
     VendorQueryParams,
     VendorCreate,
-    VendorDeactivate
+    VendorDeactivate,
+    UpdateMediaRequest,
+    UpdateMediaResponse
 )
 from app.service_managers.vendor_manager import VendorManager
 from app.utils import require_auth
@@ -73,3 +75,20 @@ async def deactivate_vendor(
 ):
     response = await VendorManager.vendor_deactivate(db=db, params=params.model_dump())
     return response
+
+
+@router.post("/update_media", status_code=status.HTTP_200_OK)
+@require_auth
+async def update_vendor_media(
+    request: Request,
+    payload: UpdateMediaRequest,
+    db: Session = Depends(get_db)
+):
+    user = request.state.user
+    media_items = [item.model_dump() for item in payload.media]
+    result = await VendorManager.update_vendor_media(
+        db=db,
+        media_items=media_items,
+        user=user
+    )
+    return result
