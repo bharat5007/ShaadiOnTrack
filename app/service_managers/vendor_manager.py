@@ -3,7 +3,7 @@ from sqlalchemy import select
 from app.models import ServiceCategory, Vendor, VendorMedia
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import selectinload
-from app.schemas import VendorQueryParams, VendorCreate, VendorUpdate
+from app.schemas import VendorQueryParams, VendorCreate, VendorUpdate, DeleteMedia
 from app.service.auth import AuthServiceClient
 
 

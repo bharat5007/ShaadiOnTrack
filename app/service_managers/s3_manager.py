@@ -5,7 +5,9 @@ import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import Vendor, VendorMedia
 from sqlalchemy import select
-from fastapi import HTTPException
+from fastapi import HTTPException, status
+from app.schemas import DeleteMedia
+from urllib.parse import urlparse
 
 class S3Manager:
 
@@ -42,19 +44,6 @@ class S3Manager:
         )
 
         public_url = f"https://{settings.S3_BUCKET_NAME}.s3.{settings.AWS_REGION}.amazonaws.com/{key}"
-        # meta = {
-        #     "file_name": file_name,
-        #     "file_size": file_size
-        # }
-        
-        # vendor_media = VendorMedia(
-        #     vendor_id=vendor_id,
-        #     media_type=content_type,
-        #     meta=meta,
-        #     url=public_url,
-        # )
-        # db.add(vendor_media)
-        # await db.commit()
 
         return {
             "upload_url": url,
@@ -62,3 +51,30 @@ class S3Manager:
             "public_url": public_url,
             "expires_in": 3600
         }
+        
+    @classmethod
+    async def delete_media(cls, db: AsyncSession, payload: DeleteMedia):
+        public_url = payload.public_url
+        parsed_url = urlparse(public_url)
+        s3_key = parsed_url.path.lstrip('/')
+        
+        media_query = select(VendorMedia).filter(
+            VendorMedia.url == public_url,
+        )
+        media_result = await db.execute(media_query)
+        media = media_result.scalars().first()
+        
+        if not media:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Media not found or does not belong to this vendor"
+            )
+        
+        cls.s3_client.delete_object(
+            Bucket=settings.S3_BUCKET_NAME,
+            Key=s3_key
+        )
+        
+        await db.delete(media)
+        await db.commit()
+        return {"message": "Media deleted"}

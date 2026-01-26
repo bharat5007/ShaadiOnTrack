@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, status
 from pydantic import BaseModel
 from typing import List, Optional
 from app.service_managers.s3_manager import S3Manager
 from app.utils import require_auth
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
+from app.schemas import DeleteMedia
+from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/storage", tags=["storage"])
 
@@ -45,3 +47,17 @@ async def get_batch_upload_urls(request: Request, payload: BatchRequest, db: Asy
         for f in payload.files
     ]
     return {"urls": urls}
+
+@router.delete("/media", status_code=status.HTTP_200_OK)
+@require_auth
+async def update_vendor_media(
+    request: Request,
+    payload: DeleteMedia,
+    db: Session = Depends(get_db)
+):
+    user = request.state.user
+    result = await S3Manager.delete_media(
+        db=db,
+        payload=payload
+    )
+    return result

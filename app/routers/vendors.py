@@ -7,7 +7,7 @@ from app.schemas import (
     VendorCreate,
     VendorDeactivate,
     UpdateMediaRequest,
-    UpdateMediaResponse
+    DeleteMedia
 )
 from app.service_managers.vendor_manager import VendorManager
 from app.utils import require_auth

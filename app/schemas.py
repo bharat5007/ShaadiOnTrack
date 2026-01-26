@@ -270,3 +270,6 @@ class UpdateMediaResponse(BaseModel):
     message: str
     vendor_id: int
     media_count: int
+    
+class DeleteMedia(BaseModel):
+    public_url: str
