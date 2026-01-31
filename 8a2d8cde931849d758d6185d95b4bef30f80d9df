@@ -1,0 +1,25 @@
+app/models.py
+  901d8dd68c2bd32c 2,4,61-68,71,78-91,94-95,97-98,101-102,105
+app/routers/vendors.py
+  901d8dd68c2bd32c 2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.0.37",
+  "base_commit_sha": "8a2d8cde931849d758d6185d95b4bef30f80d9df",
+  "prompts": {
+    "901d8dd68c2bd32c": {
+      "agent_id": {
+        "tool": "DeputyDev",
+        "id": "370715",
+        "model": "AUTO"
+      },
+      "human_author": "Bharat Goyal <bharat.goyal1@1mg.com>",
+      "messages": [],
+      "total_additions": 40,
+      "total_deletions": 30,
+      "accepted_lines": 33,
+      "overriden_lines": 0
+    }
+  }
+}
