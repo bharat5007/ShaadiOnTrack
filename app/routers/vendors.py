@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, status, Request
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.schemas import (
     VendorUpdate,
@@ -20,7 +20,7 @@ router = APIRouter(prefix="/vendors", tags=["vendors"])
 async def create_vendor(
     request: Request,
     payload: VendorCreate,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     user = request.state.user
     result = await VendorManager.create_vendor(db=db, payload=payload, user=user)
@@ -32,7 +32,7 @@ async def create_vendor(
 async def list_vendors(
     request: Request,
     params: VendorQueryParams = Depends(),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     # user = request.state.user
     vendors = await VendorManager.get_vendors(
@@ -44,10 +44,10 @@ async def list_vendors(
 
 @router.get("/user_id")
 @require_auth
-async def list_vendors(
+async def list_vendors_by_user_id(
     request: Request,
     params: VendorQueryParams = Depends(),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     user = request.state.user
     vendors = await VendorManager.get_vendors(
@@ -62,7 +62,7 @@ async def list_vendors(
 async def update_vendor(
     request: Request,
     payload: VendorUpdate,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     user = request.state.user
     response = await VendorManager.update_vendor(db=db, payload=payload, user=user)
@@ -71,9 +71,9 @@ async def update_vendor(
 @router.put("/deactivate")
 async def deactivate_vendor(
     params: VendorDeactivate = Depends(),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
-    response = await VendorManager.vendor_deactivate(db=db, params=params.model_dump())
+    response = await VendorManager.vendor_deactivate(db=db, params=params)
     return response
 
 
@@ -82,7 +82,7 @@ async def deactivate_vendor(
 async def update_vendor_media(
     request: Request,
     payload: UpdateMediaRequest,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     user = request.state.user
     media_items = [item.model_dump() for item in payload.media]

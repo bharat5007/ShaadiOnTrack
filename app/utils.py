@@ -62,9 +62,9 @@ def decode_shared_context(encoded_context: str) -> Optional[SharedContext]:
         payload = jwt.decode(
             encoded_context,
             settings.SHARED_CONTEXT_SECRET,
-            algorithms="HS256"
+            algorithms=["HS256"]
         )
-                
+
         # Verify token type and issuer for additional security
         if payload.get('typ') != 'shared-context' or payload.get('iss') != 'sot-auth':
             print(f"ERROR: Invalid token type or issuer. typ={payload.get('typ')}, iss={payload.get('iss')}")
@@ -73,7 +73,6 @@ def decode_shared_context(encoded_context: str) -> Optional[SharedContext]:
         # Map fields from auth service JWT to SharedContext
         # Auth sends: uid, email, phone, role
         # We need: user_id, username, email, role, is_active
-        print(f"<<<<<<<<<< {payload}")
         shared_data = {
             'user_id': payload.get('uid'),
             'phone': payload.get('phone'),
@@ -139,7 +138,7 @@ def require_role(*allowed_roles: str):
         @require_auth
         async def wrapper(request: Request, *args, **kwargs):
             user: SharedContext = request.state.user
-            if user.role not in allowed_roles:
+            if user.roles not in allowed_roles:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="Insufficient permissions"

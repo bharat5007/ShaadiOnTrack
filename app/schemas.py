@@ -73,8 +73,8 @@ class ServiceCategoryBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     short_desc: str
     description: str
-    percentage: int = None
-    meta: Optional[dict] = None
+    percentage: int
+    metadata: Optional[dict] = None
 
 
 class ServiceCategoryCreate(ServiceCategoryBase):
@@ -230,8 +230,7 @@ class VendorUpdate(BaseModel):
     meta: Optional[dict] = None
     
 class VendorDeactivate(BaseModel):
-    name: Optional[str] = None
-    id: Optional[int] = None
+    id: int
 
 
 # S3 Upload Schemas

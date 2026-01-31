@@ -3,15 +3,17 @@ from sqlalchemy import select
 from app.models import ServiceCategory, Vendor, VendorMedia
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import selectinload
-from app.schemas import VendorQueryParams, VendorCreate, VendorUpdate, DeleteMedia
+from app.schemas import VendorQueryParams, VendorCreate, VendorUpdate, DeleteMedia, VendorDeactivate
 from app.service.auth import AuthServiceClient
+from app.utils import SharedContext
+from typing import Optional
 
 
 
 class VendorManager:
     
     @classmethod
-    async def create_vendor(cls, db: AsyncSession, payload: VendorCreate, user: object):
+    async def create_vendor(cls, db: AsyncSession, payload: VendorCreate, user: SharedContext):
         name = payload.name
         phone1 = payload.phone1
         phone2 = payload.phone2
@@ -23,15 +25,15 @@ class VendorManager:
         city = payload.city
         district = payload.district
         metadata = payload.meta
-        service_type = int(payload.service_type)
+        service_type = payload.service_type
         
-        stmt = select(ServiceCategory).filter(ServiceCategory.id == service_type)
+        stmt = select(ServiceCategory).filter(ServiceCategory.id == int(service_type))
         service_category = await db.execute(stmt)
         service_category = service_category.scalar_one_or_none()
         
         if not service_category:
                 raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Invalid Service Category",
                 )
         
@@ -85,7 +87,7 @@ class VendorManager:
     # async def update_vendor_media(cls, db: AsyncSession, payload)
     
     @classmethod
-    async def get_vendors(cls, db: AsyncSession, params: VendorQueryParams = None, user: object = None):
+    async def get_vendors(cls, db: AsyncSession, params: Optional[VendorQueryParams] = None, user: Optional[SharedContext] = None):
         skip = params.skip if params else 0
         limit = params.limit if params else 1
         service_name = params.service_name if params else None
@@ -104,6 +106,12 @@ class VendorManager:
             stmt = select(ServiceCategory).filter(ServiceCategory.name == service_name)
             service_category = await db.execute(stmt)
             service_category = service_category.scalar_one_or_none()
+
+            if not service_category:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"No service category found for: {service_name}"
+                )
             service_id = service_category.id
         
         # Filter by vendor name if provided
@@ -158,10 +166,13 @@ class VendorManager:
         return vendors_with_media
     
     @classmethod
-    async def fetch_vendor(cls, db: AsyncSession, name: str=None, id: str=None):
+    async def fetch_vendor(cls, db: AsyncSession, name: Optional[str]=None, id: Optional[int]=None):
 
         if not (name or id):
-            return {"msg": "Name/Id missing"}
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Name/Id is missing"
+            )
         
         query = select(Vendor)
         if id:
@@ -174,7 +185,7 @@ class VendorManager:
         return vendor
     
     @classmethod
-    async def update_vendor(cls, db: AsyncSession, payload: VendorUpdate, user: object):
+    async def update_vendor(cls, db: AsyncSession, payload: VendorUpdate, user: SharedContext):
         user_id = user.user_id
         vendor_data = await cls.fetch_vendor(db=db, id=user_id)
         if not vendor_data:
@@ -194,11 +205,12 @@ class VendorManager:
         return {"msg": "Vendor successfully updated"}
     
     @classmethod
-    async def vendor_deactivate(cls, db: AsyncSession, params: dict):
-        vendor = await cls.fetch_vendor(db, params)
-        if not vendor:
+    async def vendor_deactivate(cls, db: AsyncSession, params: VendorDeactivate):
+        vendor_data = await cls.fetch_vendor(db=db, id=params.id)
+        if not vendor_data:
             return {"msg": f"No vendor found"}
         
+        vendor = vendor_data[0]
         vendor.is_active = False
         await db.commit()
         await db.refresh(vendor)
@@ -206,7 +218,7 @@ class VendorManager:
         return {"msg": "Vendor deactivated"}
     
     @classmethod
-    async def update_vendor_media(cls, db: AsyncSession, media_items: list, user: object):
+    async def update_vendor_media(cls, db: AsyncSession, media_items: list, user: SharedContext):
         user_id = user.user_id
         
         query = select(Vendor).filter(Vendor.username == str(user_id), Vendor.is_active == True)

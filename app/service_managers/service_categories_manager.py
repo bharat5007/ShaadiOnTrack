@@ -13,7 +13,7 @@ class ServiceCategoriesManagerAsync:
     @classmethod
     async def create_service_category(cls, db: AsyncSession, payload: ServiceCategoryCreate):
         name = payload.name
-        metadata = payload.meta
+        metadata = payload.metadata
         description = payload.description
         short_desc = payload.short_desc
         

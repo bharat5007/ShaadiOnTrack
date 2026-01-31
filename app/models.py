@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Text, Numeric, JSON
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 from datetime import datetime
+from typing import Optional
 from app.database import Base
 
 
@@ -57,44 +58,53 @@ class ServiceCategory(Base):
     """Service categories available."""
     __tablename__ = "service_categories"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(255), nullable=False)
-    short_desc = Column(String, nullable=False)
-    description = Column(String, nullable=False)
-    percentage = Column(Integer)
-    meta = Column(JSON)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    short_desc: Mapped[str] = mapped_column(String, nullable=False)
+    description: Mapped[str] = mapped_column(String, nullable=False)
+    percentage: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    meta: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
-    vendors = relationship("Vendor", back_populates="service_category")
+    vendors: Mapped[list["Vendor"]] = relationship("Vendor", back_populates="service_category")
 
 
 class Vendor(Base):
     """Vendors information."""
     __tablename__ = "vendors"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(255), nullable=False)
-    phone1 = Column(String(20))
-    phone2 = Column(String(20))
-    username = Column(String)
-    city = Column(String)
-    district = Column(String)
-    address = Column(String(500))
-    email = Column(String(255), nullable=True)
-    lower_range = Column(Integer)
-    upper_range = Column(Integer)
-    meta = Column(JSON)
-    is_active = Column(Boolean, default=True)
-    service_category_id = Column(Integer, ForeignKey("service_categories.id"), index=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    phone1: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    phone2: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    username: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    city: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    district: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    address: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    email: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    lower_range: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    upper_range: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    meta: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    service_category_id: Mapped[Optional[int]] = mapped_column(
+        Integer,
+        ForeignKey("service_categories.id"),
+        index=True,
+        nullable=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Relationships
-    service_category = relationship("ServiceCategory", back_populates="vendors")
-    vendor_media = relationship("VendorMedia", back_populates="vendor", cascade="all, delete-orphan")
-    budget_vendor_maps = relationship("BudgetVendorMap", back_populates="vendor", cascade="all, delete-orphan")
+    service_category: Mapped["ServiceCategory"] = relationship("ServiceCategory", back_populates="vendors")
+    vendor_media: Mapped[list["VendorMedia"]] = relationship(
+        "VendorMedia", back_populates="vendor", cascade="all, delete-orphan"
+    )
+    budget_vendor_maps: Mapped[list["BudgetVendorMap"]] = relationship(
+        "BudgetVendorMap", back_populates="vendor", cascade="all, delete-orphan"
+    )
 
 
 class VendorMedia(Base):
