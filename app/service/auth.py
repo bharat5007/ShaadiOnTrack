@@ -2,14 +2,12 @@ from app.config import settings
 from fastapi import HTTPException
 import httpx
 import logging
-import base64
-import uuid
 import jwt
 
 logger = logging.getLogger(__name__)
 
+
 class AuthServiceClient:
-    
     @classmethod
     def _generate_service_token(cls) -> str:
         """Create a simple service-to-service JWT from env secret."""
@@ -17,8 +15,10 @@ class AuthServiceClient:
         if not secret:
             raise RuntimeError("AUTH_SERVICE_TOKEN is not configured")
 
-        return jwt.encode({"service": settings.AUTH_SERVICE_TOKEN}, secret, algorithm="HS256")
-    
+        return jwt.encode(
+            {"service": settings.AUTH_SERVICE_TOKEN}, secret, algorithm="HS256"
+        )
+
     @staticmethod
     def _extract_error_message(resp: httpx.Response) -> str:
         # Typical FastAPI errors:
@@ -42,18 +42,21 @@ class AuthServiceClient:
         except ValueError:
             pass
 
-        return (resp.text or "").strip()[:500] or f"Auth service returned {resp.status_code}"
-    
+        return (resp.text or "").strip()[
+            :500
+        ] or f"Auth service returned {resp.status_code}"
+
     @classmethod
     async def update_vendor_role(cls, payload):
         token = cls._generate_service_token()
-        headers = {
-            "Authorization": f"Bearer {token}"
-        }
+        headers = {"Authorization": f"Bearer {token}"}
         async with httpx.AsyncClient(timeout=settings.AUTH_SERVICE_TIMEOUT) as client:
             path = f"{settings.AUTH_SERVICE_URL}/api/v1/auth/add-vendor-role"
-            auth_response = await client.post(path,json=payload, headers=headers)
-                
+            auth_response = await client.post(path, json=payload, headers=headers)
+
             if not auth_response.is_success:
                 msg = cls._extract_error_message(auth_response)
-                raise HTTPException(status_code=auth_response.status_code, detail=f"Unable to update role: {msg}")
+                raise HTTPException(
+                    status_code=auth_response.status_code,
+                    detail=f"Unable to update role: {msg}",
+                )

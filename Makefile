@@ -1,4 +1,4 @@
-.PHONY: setup activate run clean help
+.PHONY: setup activate run clean help lint format check
 
 # Default Python version
 PYTHON := python3.9
@@ -15,6 +15,9 @@ help:
 	@echo "  make dev       - Setup + Run (convenience command)"
 	@echo "  make tables    - Create database tables"
 	@echo "  make test-db   - Test database connection"
+	@echo "  make lint      - Run ruff linter"
+	@echo "  make format    - Format code with ruff"
+	@echo "  make check     - Run lint + format check"
 	@echo "  make clean     - Remove virtual environment and cache files"
 	@echo ""
 
@@ -24,7 +27,7 @@ setup:
 	@echo ""
 	@echo "📦 Installing requirements..."
 	$(ACTIVATE) && pip install --upgrade pip
-	$(ACTIVATE) && pip install -r requirements_async.txt
+	$(ACTIVATE) && pip install -r requirements.txt
 	@echo ""
 	@echo "✅ Setup complete!"
 	@echo ""
@@ -79,12 +82,38 @@ test-db:
 	$(ACTIVATE) && python test_db.py || echo "⚠️  test_db.py not found or failed"
 	@echo ""
 
+lint:
+	@echo "🔍 Running ruff linter..."
+	@if [ ! -d "$(VENV)" ]; then \
+		echo "❌ Virtual environment not found. Run 'make setup' first."; \
+		exit 1; \
+	fi
+	$(ACTIVATE) && ruff check app/
+	@echo ""
+
+format:
+	@echo "✨ Formatting code with ruff..."
+	@if [ ! -d "$(VENV)" ]; then \
+		echo "❌ Virtual environment not found. Run 'make setup' first."; \
+		exit 1; \
+	fi
+	$(ACTIVATE) && ruff format app/
+	@echo "✅ Code formatted!"
+	@echo ""
+
+check: lint
+	@echo "🔍 Running format check..."
+	$(ACTIVATE) && ruff format --check app/
+	@echo "✅ All checks passed!"
+	@echo ""
+
 clean:
 	@echo "🧹 Cleaning up..."
 	rm -rf $(VENV)
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name "*.pyc" -delete
 	find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name ".ruff_cache" -exec rm -rf {} + 2>/dev/null || true
 	@echo "✅ Cleanup complete!"
 
 # Convenience commands

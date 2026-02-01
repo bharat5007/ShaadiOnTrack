@@ -7,7 +7,6 @@ from app.schemas import (
     VendorCreate,
     VendorDeactivate,
     UpdateMediaRequest,
-    DeleteMedia
 )
 from app.service_managers.vendor_manager import VendorManager
 from app.utils import require_auth
@@ -32,13 +31,10 @@ async def create_vendor(
 async def list_vendors(
     request: Request,
     params: VendorQueryParams = Depends(),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     # user = request.state.user
-    vendors = await VendorManager.get_vendors(
-        db=db, 
-        params=params
-    )
+    vendors = await VendorManager.get_vendors(db=db, params=params)
     return vendors
 
 
@@ -47,13 +43,10 @@ async def list_vendors(
 async def list_vendors_by_user_id(
     request: Request,
     params: VendorQueryParams = Depends(),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     user = request.state.user
-    vendors = await VendorManager.get_vendors(
-        db=db, 
-        user=user
-    )
+    vendors = await VendorManager.get_vendors(db=db, user=user)
     return vendors
 
 
@@ -68,6 +61,7 @@ async def update_vendor(
     response = await VendorManager.update_vendor(db=db, payload=payload, user=user)
     return response
 
+
 @router.put("/deactivate")
 async def deactivate_vendor(
     params: VendorDeactivate = Depends(),
@@ -80,15 +74,11 @@ async def deactivate_vendor(
 @router.post("/update_media", status_code=status.HTTP_200_OK)
 @require_auth
 async def update_vendor_media(
-    request: Request,
-    payload: UpdateMediaRequest,
-    db: AsyncSession = Depends(get_db)
+    request: Request, payload: UpdateMediaRequest, db: AsyncSession = Depends(get_db)
 ):
     user = request.state.user
     media_items = [item.model_dump() for item in payload.media]
     result = await VendorManager.update_vendor_media(
-        db=db,
-        media_items=media_items,
-        user=user
+        db=db, media_items=media_items, user=user
     )
     return result

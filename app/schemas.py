@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import datetime
 
@@ -6,6 +6,7 @@ from datetime import datetime
 # Wedding Core Schemas
 class WeddingCoreBase(BaseModel):
     """Base schema for Wedding."""
+
     name: str = Field(..., min_length=1, max_length=255)
     total_budget: Optional[int] = None
     spent_budget: Optional[int] = 0
@@ -13,11 +14,13 @@ class WeddingCoreBase(BaseModel):
 
 class WeddingCoreCreate(WeddingCoreBase):
     """Schema for creating a wedding."""
+
     pass
 
 
 class WeddingCoreUpdate(BaseModel):
     """Schema for updating a wedding."""
+
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     total_budget: Optional[int] = None
     spent_budget: Optional[int] = None
@@ -25,11 +28,12 @@ class WeddingCoreUpdate(BaseModel):
 
 class WeddingCoreResponse(WeddingCoreBase):
     """Schema for wedding response."""
+
     id: int
     user_id: int
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True
 
@@ -37,6 +41,7 @@ class WeddingCoreResponse(WeddingCoreBase):
 # Budget Category Schemas
 class BudgetCategoryBase(BaseModel):
     """Base schema for Budget Category."""
+
     budget_cat: Optional[int] = None
     budget_amt: Optional[int] = None
     actual_cost: Optional[int] = None
@@ -45,11 +50,13 @@ class BudgetCategoryBase(BaseModel):
 
 class BudgetCategoryCreate(BudgetCategoryBase):
     """Schema for creating a budget category."""
+
     wedding_id: int
 
 
 class BudgetCategoryUpdate(BaseModel):
     """Schema for updating a budget category."""
+
     budget_cat: Optional[int] = None
     budget_amt: Optional[int] = None
     actual_cost: Optional[int] = None
@@ -58,11 +65,12 @@ class BudgetCategoryUpdate(BaseModel):
 
 class BudgetCategoryResponse(BudgetCategoryBase):
     """Schema for budget category response."""
+
     id: int
     wedding_id: int
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True
 
@@ -70,6 +78,7 @@ class BudgetCategoryResponse(BudgetCategoryBase):
 # Service Category Schemas
 class ServiceCategoryBase(BaseModel):
     """Base schema for Service Category."""
+
     name: str = Field(..., min_length=1, max_length=255)
     short_desc: str
     description: str
@@ -79,21 +88,24 @@ class ServiceCategoryBase(BaseModel):
 
 class ServiceCategoryCreate(ServiceCategoryBase):
     """Schema for creating a service category."""
+
     pass
 
 
 class ServiceCategoryUpdate(BaseModel):
     """Schema for updating a service category."""
+
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     meta: Optional[str] = None
 
 
 class ServiceCategoryResponse(ServiceCategoryBase):
     """Schema for service category response."""
+
     id: int
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True
 
@@ -101,6 +113,7 @@ class ServiceCategoryResponse(ServiceCategoryBase):
 # Vendor Schemas
 class VendorBase(BaseModel):
     """Base schema for Vendor."""
+
     name: str = Field(..., min_length=1, max_length=255)
     address: Optional[str] = Field(None, max_length=500)
     emails: Optional[str] = Field(None, max_length=255)
@@ -122,22 +135,13 @@ class VendorCreate(VendorBase):
     service_type: str
 
 
-class VendorUpdate(BaseModel):
-    """Schema for updating a vendor."""
-    name: Optional[str] = Field(None, min_length=1, max_length=255)
-    phones: Optional[str] = Field(None, max_length=255)
-    address: Optional[str] = Field(None, max_length=500)
-    emails: Optional[str] = Field(None, max_length=255)
-    metadatas: Optional[str] = None
-    service_categories: Optional[int] = None
-
-
 class VendorResponse(VendorBase):
     """Schema for vendor response."""
+
     id: int
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True
 
@@ -145,28 +149,32 @@ class VendorResponse(VendorBase):
 # Vendor Media Schemas
 class VendorMediaBase(BaseModel):
     """Base schema for Vendor Media."""
+
     media_type: Optional[str] = Field(None, max_length=50)
     type: Optional[str] = Field(None, max_length=100)
 
 
 class VendorMediaCreate(VendorMediaBase):
     """Schema for creating vendor media."""
+
     vendor_id: int
 
 
 class VendorMediaUpdate(BaseModel):
     """Schema for updating vendor media."""
+
     media_type: Optional[str] = Field(None, max_length=50)
     type: Optional[str] = Field(None, max_length=100)
 
 
 class VendorMediaResponse(VendorMediaBase):
     """Schema for vendor media response."""
+
     id: int
     vendor_id: int
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True
 
@@ -174,6 +182,7 @@ class VendorMediaResponse(VendorMediaBase):
 # Budget Vendor Map Schemas
 class BudgetVendorMapBase(BaseModel):
     """Base schema for Budget Vendor Map."""
+
     budget_id: int
     vendor_id: int
     wedding_id: int
@@ -181,11 +190,13 @@ class BudgetVendorMapBase(BaseModel):
 
 class BudgetVendorMapCreate(BudgetVendorMapBase):
     """Schema for creating budget vendor map."""
+
     pass
 
 
 class BudgetVendorMapUpdate(BaseModel):
     """Schema for updating budget vendor map."""
+
     budget_id: Optional[int] = None
     vendor_id: Optional[int] = None
     wedding_id: Optional[int] = None
@@ -193,10 +204,11 @@ class BudgetVendorMapUpdate(BaseModel):
 
 class BudgetVendorMapResponse(BudgetVendorMapBase):
     """Schema for budget vendor map response."""
+
     id: int
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True
 
@@ -204,11 +216,13 @@ class BudgetVendorMapResponse(BudgetVendorMapBase):
 # Pagination Schema
 class PaginatedResponse(BaseModel):
     """Schema for paginated responses."""
+
     total: int
     page: int
     page_size: int
     items: List[dict]
-    
+
+
 class VendorQueryParams(BaseModel):
     skip: int = Field(0, ge=0)
     limit: int = Field(100, ge=1, le=100)
@@ -217,7 +231,8 @@ class VendorQueryParams(BaseModel):
     name: Optional[str] = None
     vendor_id: Optional[int] = None
     user_id: Optional[str] = None
-    
+
+
 class VendorUpdate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     phone2: Optional[str] = Field(None, max_length=255)
@@ -228,7 +243,8 @@ class VendorUpdate(BaseModel):
     lower_range: int
     upper_range: int
     meta: Optional[dict] = None
-    
+
+
 class VendorDeactivate(BaseModel):
     id: int
 
@@ -236,6 +252,7 @@ class VendorDeactivate(BaseModel):
 # S3 Upload Schemas
 class S3UploadUrlRequest(BaseModel):
     """Request schema for generating S3 presigned upload URL."""
+
     file_name: str
     file_type: str
     media_type: str
@@ -244,15 +261,21 @@ class S3UploadUrlRequest(BaseModel):
 
 class S3UploadUrlResponse(BaseModel):
     """Response schema containing presigned URL and metadata."""
-    upload_url: str = Field(..., description="Presigned URL for uploading the file to S3")
+
+    upload_url: str = Field(
+        ..., description="Presigned URL for uploading the file to S3"
+    )
     file_key: str = Field(..., description="S3 key/path where file will be stored")
-    public_url: str = Field(..., description="Public URL to access the file after upload")
+    public_url: str = Field(
+        ..., description="Public URL to access the file after upload"
+    )
     expire_in: int = Field(..., description="Upload URL expiry time in seconds")
 
 
 # Vendor Media Update Schemas
 class MediaItem(BaseModel):
     """Schema for individual media item."""
+
     content_type: str
     file_name: str
     file_size: int
@@ -261,14 +284,17 @@ class MediaItem(BaseModel):
 
 class UpdateMediaRequest(BaseModel):
     """Request schema for updating vendor media."""
+
     media: List[MediaItem] = Field(..., description="List of media items to add")
 
 
 class UpdateMediaResponse(BaseModel):
     """Response schema for media update."""
+
     message: str
     vendor_id: int
     media_count: int
-    
+
+
 class DeleteMedia(BaseModel):
     public_url: str

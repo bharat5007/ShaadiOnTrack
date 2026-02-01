@@ -7,11 +7,7 @@ from app.config import settings
 database_url = settings.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://")
 
 engine = create_async_engine(
-    database_url,
-    echo=settings.DEBUG,
-    pool_pre_ping=True,
-    pool_size=10,
-    max_overflow=20
+    database_url, echo=settings.DEBUG, pool_pre_ping=True, pool_size=10, max_overflow=20
 )
 
 # Create async SessionLocal class
@@ -20,7 +16,7 @@ AsyncSessionLocal = async_sessionmaker(
     class_=AsyncSession,
     expire_on_commit=False,
     autocommit=False,
-    autoflush=False
+    autoflush=False,
 )
 
 # Create Base class for declarative models

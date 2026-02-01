@@ -1,4 +1,13 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Text, Numeric, JSON
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    DateTime,
+    Boolean,
+    ForeignKey,
+    Text,
+    JSON,
+)
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from datetime import datetime
 from typing import Optional
@@ -7,6 +16,7 @@ from app.database import Base
 
 class Budget(Base):
     """Wedding core information table."""
+
     __tablename__ = "budget"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -33,10 +43,13 @@ class Budget(Base):
 
 class BudgetCategory(Base):
     """Budget categories for weddings."""
+
     __tablename__ = "budget_categories"
 
     id = Column(Integer, primary_key=True, index=True)
-    budget_id = Column(Integer, ForeignKey("budget.id", ondelete="CASCADE"), nullable=False, index=True)
+    budget_id = Column(
+        Integer, ForeignKey("budget.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     budget_cat = Column(Integer)
     budget_amt = Column(Integer)
     actual_cost = Column(Integer)
@@ -56,6 +69,7 @@ class BudgetCategory(Base):
 
 class ServiceCategory(Base):
     """Service categories available."""
+
     __tablename__ = "service_categories"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
@@ -65,14 +79,19 @@ class ServiceCategory(Base):
     percentage: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     meta: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
     # Relationships
-    vendors: Mapped[list["Vendor"]] = relationship("Vendor", back_populates="service_category")
+    vendors: Mapped[list["Vendor"]] = relationship(
+        "Vendor", back_populates="service_category"
+    )
 
 
 class Vendor(Base):
     """Vendors information."""
+
     __tablename__ = "vendors"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
@@ -95,10 +114,14 @@ class Vendor(Base):
         nullable=True,
     )
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
     # Relationships
-    service_category: Mapped["ServiceCategory"] = relationship("ServiceCategory", back_populates="vendors")
+    service_category: Mapped["ServiceCategory"] = relationship(
+        "ServiceCategory", back_populates="vendors"
+    )
     vendor_media: Mapped[list["VendorMedia"]] = relationship(
         "VendorMedia", back_populates="vendor", cascade="all, delete-orphan"
     )
@@ -109,10 +132,16 @@ class Vendor(Base):
 
 class VendorMedia(Base):
     """Media associated with vendors."""
+
     __tablename__ = "vendor_media"
 
     id = Column(Integer, primary_key=True, index=True)
-    vendor_id = Column(Integer, ForeignKey("vendors.id", ondelete="CASCADE"), nullable=False, index=True)
+    vendor_id = Column(
+        Integer,
+        ForeignKey("vendors.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
     media_type = Column(String(50))
     meta = Column(JSON)
     url = Column(Text)
@@ -125,6 +154,7 @@ class VendorMedia(Base):
 
 class BudgetVendorMap(Base):
     """Mapping between budgets and vendors."""
+
     __tablename__ = "budget_vendor_map"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -152,6 +182,8 @@ class BudgetVendorMap(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Relationships
-    budget_category = relationship("BudgetCategory", back_populates="budget_vendor_maps")
+    budget_category = relationship(
+        "BudgetCategory", back_populates="budget_vendor_maps"
+    )
     vendor = relationship("Vendor", back_populates="budget_vendor_maps")
     budget = relationship("Budget", back_populates="budget_vendor_maps")

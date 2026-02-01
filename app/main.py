@@ -15,8 +15,7 @@ import logging
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -25,7 +24,7 @@ app = FastAPI(
     title="Wedding Core Service",
     description="Microservice for managing wedding planning and vendors",
     version="1.0.0",
-    debug=settings.DEBUG
+    debug=settings.DEBUG,
 )
 
 # Configure CORS
@@ -55,11 +54,7 @@ async def startup_event():
 @app.get("/health", tags=["health"])
 async def health_check():
     """Health check endpoint."""
-    return {
-        "status": "healthy",
-        "service": settings.SERVICE_NAME,
-        "version": "1.0.0"
-    }
+    return {"status": "healthy", "service": settings.SERVICE_NAME, "version": "1.0.0"}
 
 
 # Root endpoint
@@ -71,7 +66,7 @@ async def root():
         "version": "1.0.0",
         "status": "running",
         "docs": "/docs",
-        "health": "/health"
+        "health": "/health",
     }
 
 
@@ -84,8 +79,8 @@ async def global_exception_handler(request: Request, exc: Exception):
         status_code=500,
         content={
             "detail": "Internal server error",
-            "error": str(exc) if settings.DEBUG else "An error occurred"
-        }
+            "error": str(exc) if settings.DEBUG else "An error occurred",
+        },
     )
 
 
