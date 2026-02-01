@@ -1,0 +1,23 @@
+app/routers/service_categories.py
+  901d8dd68c2bd32c 3,15,26,38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.0.37",
+  "base_commit_sha": "7282272ecebcae0f003c04fa9ed67db10a6eac04",
+  "prompts": {
+    "901d8dd68c2bd32c": {
+      "agent_id": {
+        "tool": "DeputyDev",
+        "id": "370715",
+        "model": "AUTO"
+      },
+      "human_author": "Bharat Goyal <bharat.goyal1@1mg.com>",
+      "messages": [],
+      "total_additions": 4,
+      "total_deletions": 4,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    }
+  }
+}
