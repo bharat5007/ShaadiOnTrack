@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.service_managers.budget_manager import BudgetManager
 from app.utils import require_auth
+from app.schemas import CreateBudget, UpdateBudgetCategory
 
 budget = APIRouter(prefix="/budget", tags=["budget-categories"])
 
@@ -11,7 +12,7 @@ budget = APIRouter(prefix="/budget", tags=["budget-categories"])
 @require_auth
 async def create_budget(
     request: Request,
-    payload: dict,
+    payload: CreateBudget,
     db: AsyncSession = Depends(get_db),
 ):
     user = request.state.user
@@ -20,10 +21,13 @@ async def create_budget(
 
 
 @budget.get("/", status_code=status.HTTP_201_CREATED)
+@require_auth
 async def get_budgets(
+    request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    result = await BudgetManager.get_budgets(db=db)
+    user = request.state.user
+    result = await BudgetManager.get_budgets(db=db, user=user)
     return result
 
 
@@ -36,13 +40,12 @@ async def get_budget_by_id(
     return result
 
 
-@budget.put("/{id}", status_code=status.HTTP_200_OK)
+@budget.put("/", status_code=status.HTTP_200_OK)
 async def update_budget(
-    id: int,
-    payload: dict,
+    payload: UpdateBudgetCategory,
     db: AsyncSession = Depends(get_db),
 ):
-    result = await BudgetManager.update_budget(db=db, id=id, payload=payload)
+    result = await BudgetManager.update_budget_categories(db=db, payload=payload)
     return result
 
 

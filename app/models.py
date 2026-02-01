@@ -19,14 +19,16 @@ class Budget(Base):
 
     __tablename__ = "budget"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, nullable=False, index=True)
     name = Column(String(255), nullable=False)
-    total_budget = Column(Integer)
-    spent_budget = Column(Integer, default=0)
-    meta = Column(JSON)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    total_budget: Mapped[int] = mapped_column(Integer, nullable=False)
+    spent_budget: Mapped[int] = mapped_column(Integer, default=0)
+    meta: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
     # Relationships
     budget_categories = relationship(
@@ -46,17 +48,18 @@ class BudgetCategory(Base):
 
     __tablename__ = "budget_categories"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     budget_id = Column(
         Integer, ForeignKey("budget.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    budget_cat = Column(Integer)
-    budget_amt = Column(Integer)
-    actual_cost = Column(Integer)
-    remaining = Column(Integer)
-    meta = Column(JSON)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    name: Mapped[str]
+    total_amt: Mapped[Optional[int]] = mapped_column(Integer, nullable=False)
+    actual_cost: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    meta: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
     # Relationships
     budget = relationship("Budget", back_populates="budget_categories")

@@ -38,6 +38,27 @@ class WeddingCoreResponse(WeddingCoreBase):
         from_attributes = True
 
 
+class CreateBudgetCategories(BaseModel):
+    name: str
+    total_amt: int
+    actual_cost: Optional[int] = 0
+    meta: Optional[dict]
+    pass
+
+
+class UpdateBudgetCategory(BaseModel):
+    budget_id: int
+    total_amt: int
+    actual_cost: int
+    meta: Optional[dict]
+
+
+class CreateBudget(BaseModel):
+    total_budget: int
+    name: str
+    categories: list[CreateBudgetCategories]
+
+
 # Budget Category Schemas
 class BudgetCategoryBase(BaseModel):
     """Base schema for Budget Category."""
