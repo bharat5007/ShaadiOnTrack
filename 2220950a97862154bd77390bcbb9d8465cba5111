@@ -1,0 +1,25 @@
+requirements.txt
+  901d8dd68c2bd32c 1,4-5,7,9-11,14-15,18-20,22-29,31-33
+Makefile
+  901d8dd68c2bd32c 1,18-20,30,85-109,116
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.0.37",
+  "base_commit_sha": "2220950a97862154bd77390bcbb9d8465cba5111",
+  "prompts": {
+    "901d8dd68c2bd32c": {
+      "agent_id": {
+        "tool": "DeputyDev",
+        "id": "370715",
+        "model": "AUTO"
+      },
+      "human_author": "Bharat Goyal <bharat.goyal1@1mg.com>",
+      "messages": [],
+      "total_additions": 54,
+      "total_deletions": 6,
+      "accepted_lines": 54,
+      "overriden_lines": 0
+    }
+  }
+}
