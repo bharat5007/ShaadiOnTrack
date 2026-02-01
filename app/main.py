@@ -5,7 +5,6 @@ from app.config import settings
 from app.database import engine, Base
 from app.routers import (
     budget,
-    weddings,
     service_categories,
     vendors,
     s3,
@@ -85,7 +84,6 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 
 # Include routers
-app.include_router(weddings.router, prefix="/api/v1")
 app.include_router(budget.budget, prefix="/api/v1")
 app.include_router(service_categories.router, prefix="/api/v1")
 app.include_router(vendors.router, prefix="/api/v1")

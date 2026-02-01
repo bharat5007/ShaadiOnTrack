@@ -15,7 +15,7 @@ async def create_budget(
     db: AsyncSession = Depends(get_db),
 ):
     user = request.state.user
-    result = await BudgetManager.create_budget(db=db, payload=payload,user=user)
+    result = await BudgetManager.create_budget(db=db, payload=payload, user=user)
     return result
 
 

@@ -26,7 +26,7 @@ class BudgetManager:
 
     @classmethod
     async def update_budget_categories(
-        cls, db: AsyncSession, payload: dict, budget_id: Optiona[int] = None
+        cls, db: AsyncSession, payload: dict, budget_id: Optional[int] = None
     ):
         budget_id = budget_id or payload.get("budget_id")
         if not budget_id:
@@ -36,6 +36,8 @@ class BudgetManager:
             )
 
         budget_categories = payload.get("budget_categories")
+        if not budget_categories:
+            return
 
         for categories in budget_categories:
             name = categories.get("name")
@@ -47,7 +49,7 @@ class BudgetManager:
             if not category:
                 category = BudgetCategory(budget_id=budget_id, name=name)
 
-            category.total_cost = categories.get("total_cost")
+            category.budget_amt = categories.get("total_cost")
             category.actual_cost = categories.get("actual_cost", 0)
             category.remarks = categories.get("remarks")
 
