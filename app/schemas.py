@@ -200,40 +200,6 @@ class VendorMediaResponse(VendorMediaBase):
         from_attributes = True
 
 
-# Budget Vendor Map Schemas
-class BudgetVendorMapBase(BaseModel):
-    """Base schema for Budget Vendor Map."""
-
-    budget_id: int
-    vendor_id: int
-    wedding_id: int
-
-
-class BudgetVendorMapCreate(BudgetVendorMapBase):
-    """Schema for creating budget vendor map."""
-
-    pass
-
-
-class BudgetVendorMapUpdate(BaseModel):
-    """Schema for updating budget vendor map."""
-
-    budget_id: Optional[int] = None
-    vendor_id: Optional[int] = None
-    wedding_id: Optional[int] = None
-
-
-class BudgetVendorMapResponse(BudgetVendorMapBase):
-    """Schema for budget vendor map response."""
-
-    id: int
-    created_at: datetime
-    updated_at: datetime
-
-    class Config:
-        from_attributes = True
-
-
 # Pagination Schema
 class PaginatedResponse(BaseModel):
     """Schema for paginated responses."""

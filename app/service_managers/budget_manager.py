@@ -58,12 +58,12 @@ class BudgetManager:
     async def update_budget_categories(
         cls, db: AsyncSession, payload: UpdateBudgetCategory
     ):
-        budget_id = UpdateBudgetCategory.budget_id
+        budget_id = payload.budget_id
         category = BudgetCategory(budget_id=budget_id)
 
-        category.total_amt = UpdateBudgetCategory.total_amt
-        category.actual_cost = UpdateBudgetCategory.actual_cost
-        category.meta = UpdateBudgetCategory.meta
+        category.total_amt = payload.total_amt
+        category.actual_cost = payload.actual_cost
+        category.meta = payload.meta
 
         await db.commit()
         return {"msg": "Budget updated"}

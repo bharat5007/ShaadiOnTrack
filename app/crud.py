@@ -7,7 +7,6 @@ from app.models import (
     ServiceCategory,
     Vendor,
     VendorMedia,
-    BudgetVendorMap,
 )
 
 
@@ -112,42 +111,9 @@ class CRUDVendorMedia(CRUDBase[VendorMedia]):
         )
 
 
-class CRUDBudgetVendorMap(CRUDBase[BudgetVendorMap]):
-    """CRUD operations for Budget Vendor Map."""
-
-    def get_by_wedding(
-        self, db: Session, wedding_id: int, skip: int = 0, limit: int = 100
-    ) -> List[BudgetVendorMap]:
-        """Get all budget-vendor mappings for a specific wedding."""
-        return (
-            db.query(BudgetVendorMap)
-            .filter(BudgetVendorMap.wedding_id == wedding_id)
-            .offset(skip)
-            .limit(limit)
-            .all()
-        )
-
-    def get_by_budget(self, db: Session, budget_id: int) -> List[BudgetVendorMap]:
-        """Get all vendors mapped to a specific budget."""
-        return (
-            db.query(BudgetVendorMap)
-            .filter(BudgetVendorMap.budget_id == budget_id)
-            .all()
-        )
-
-    def get_by_vendor(self, db: Session, vendor_id: int) -> List[BudgetVendorMap]:
-        """Get all budgets mapped to a specific vendor."""
-        return (
-            db.query(BudgetVendorMap)
-            .filter(BudgetVendorMap.vendor_id == vendor_id)
-            .all()
-        )
-
-
 # Create CRUD instances
 wedding_core_crud = CRUDWeddingCore(Budget)
 budget_category_crud = CRUDBudgetCategory(BudgetCategory)
 service_category_crud = CRUDServiceCategory(ServiceCategory)
 vendor_crud = CRUDVendor(Vendor)
 vendor_media_crud = CRUDVendorMedia(VendorMedia)
-budget_vendor_map_crud = CRUDBudgetVendorMap(BudgetVendorMap)
