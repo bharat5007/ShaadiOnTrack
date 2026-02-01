@@ -1,0 +1,9 @@
+[01/02/2026 7:59 PM] Bharat Goyal: __pycache__
+*.pyc
+*.pyo
+.git
+.env
+.venv
+venv/
+*.md
+.gitignore
