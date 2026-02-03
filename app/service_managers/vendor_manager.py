@@ -95,17 +95,27 @@ class VendorManager:
     ):
         skip = params.skip if params else 0
         limit = params.limit if params else 1
-        service_name = params.service_name if params else None
-        name = params.name if params else None
-        service_id = params.service_id if params else None
-        vendor_id = params.vendor_id if params else None
+
+        service_name = getattr(params, "service_name", None)
+        name = getattr(params, "name", None)
+        service_id = getattr(params, "service_id", None)
+        vendor_id = getattr(params, "vendor_id", None)
+        city = getattr(params, "city", None)
+        district = getattr(params, "district", None)
+        min_price = getattr(params, "min_price", None)
+        max_price = getattr(params, "max_price", None)
+
+        # Extract user_id from user context
         user_id = str(user.user_id) if user and user.user_id else None
 
         query = select(Vendor).options(
             selectinload(Vendor.vendor_media), selectinload(Vendor.service_category)
         )
 
-        # Filter by service category name if provided
+        # Always filter for active vendors
+        query = query.filter(Vendor.is_active)
+
+        # Filter by service category name if provided (resolves to service_id)
         if service_name:
             stmt = select(ServiceCategory).filter(ServiceCategory.name == service_name)
             service_category = await db.execute(stmt)
@@ -118,20 +128,30 @@ class VendorManager:
                 )
             service_id = service_category.id
 
-        # Filter by vendor name if provided
-        elif name:
-            query = query.filter(Vendor.name.ilike(f"%{name}%"), Vendor.is_active)
+        # Accumulate filters - apply each filter if parameter is provided
+        if name:
+            query = query.filter(Vendor.name.ilike(f"%{name}%"))
 
-        elif service_id:
-            query = query.filter(
-                Vendor.service_category_id == service_id, Vendor.is_active
-            )
+        if service_id:
+            query = query.filter(Vendor.service_category_id == service_id)
 
-        elif vendor_id:
-            query = query.filter(Vendor.id == vendor_id, Vendor.is_active)
+        if vendor_id:
+            query = query.filter(Vendor.id == vendor_id)
 
-        elif user_id:
-            query = query.filter(Vendor.username == user_id, Vendor.is_active)
+        if user_id:
+            query = query.filter(Vendor.username == user_id)
+
+        if city:
+            query = query.filter(Vendor.city == city)
+
+        if district:
+            query = query.filter(Vendor.district == district)
+
+        if min_price:
+            query = query.filter(Vendor.lower_range == int(min_price))
+
+        if max_price:
+            query = query.filter(Vendor.upper_range == int(max_price))
 
         query = query.offset(skip).limit(limit)
         result = await db.execute(query)

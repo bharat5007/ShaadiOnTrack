@@ -218,6 +218,10 @@ class VendorQueryParams(BaseModel):
     name: Optional[str] = None
     vendor_id: Optional[int] = None
     user_id: Optional[str] = None
+    city: Optional[str] = None
+    district: Optional[str] = None
+    min_price: Optional[str] = None
+    max_price: Optional[str] = None
 
 
 class VendorUpdate(BaseModel):
