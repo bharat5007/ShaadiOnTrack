@@ -1,0 +1,23 @@
+app/service_managers/vendor_manager.py
+  901d8dd68c2bd32c 108,115-118,131-132,135,138,141
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.0.37",
+  "base_commit_sha": "29989e3147523054eeaba966024d1be5a0bd719e",
+  "prompts": {
+    "901d8dd68c2bd32c": {
+      "agent_id": {
+        "tool": "DeputyDev",
+        "id": "370715",
+        "model": "AUTO"
+      },
+      "human_author": "Bharat Goyal <bharat.goyal1@1mg.com>",
+      "messages": [],
+      "total_additions": 26,
+      "total_deletions": 20,
+      "accepted_lines": 10,
+      "overriden_lines": 5
+    }
+  }
+}
