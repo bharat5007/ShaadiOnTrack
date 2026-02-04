@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from app.models import ServiceCategory, Vendor, VendorMedia
 from fastapi import HTTPException, status
 from sqlalchemy.orm import selectinload
@@ -93,8 +93,11 @@ class VendorManager:
         params: Optional[VendorQueryParams] = None,
         user: Optional[SharedContext] = None,
     ):
-        skip = params.skip if params else 0
-        limit = params.limit if params else 1
+        limit = params.page_size if params else 1
+        skip = params.page if params else 0
+        if skip:
+            skip = (skip-1)*limit
+
 
         service_name = getattr(params, "service_name", None)
         name = getattr(params, "name", None)
@@ -153,6 +156,12 @@ class VendorManager:
         if max_price:
             query = query.filter(Vendor.upper_range == int(max_price))
 
+        # Get total count of records matching the filters (before pagination)
+        count_query = select(func.count()).select_from(query.subquery())
+        total_result = await db.execute(count_query)
+        total = total_result.scalar() or 0
+
+        # Apply pagination
         query = query.offset(skip).limit(limit)
         result = await db.execute(query)
         vendors = result.scalars().all()
@@ -191,7 +200,17 @@ class VendorManager:
             }
             vendors_with_media.append(vendor_dict)
 
-        return vendors_with_media
+        # Calculate pagination metadata
+        page = (skip // limit) + 1 if limit > 0 else 1
+        total_pages = (total + limit - 1) // limit if limit > 0 else 1
+
+        # Return paginated response
+        return {
+            "total": total_pages,
+            "page": page,
+            "page_size": limit,
+            "items": vendors_with_media,
+        }
 
     @classmethod
     async def fetch_vendor(

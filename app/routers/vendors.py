@@ -7,6 +7,7 @@ from app.schemas import (
     VendorCreate,
     VendorDeactivate,
     UpdateMediaRequest,
+    PaginatedResponse,
 )
 from app.service_managers.vendor_manager import VendorManager
 from app.utils import require_auth
@@ -26,7 +27,7 @@ async def create_vendor(
     return result
 
 
-@router.get("/")
+@router.get("/", response_model=PaginatedResponse)
 # @require_auth
 async def list_vendors(
     request: Request,
@@ -34,11 +35,11 @@ async def list_vendors(
     db: AsyncSession = Depends(get_db),
 ):
     # user = request.state.user
-    vendors = await VendorManager.get_vendors(db=db, params=params)
-    return vendors
+    paginated_vendors = await VendorManager.get_vendors(db=db, params=params)
+    return paginated_vendors
 
 
-@router.get("/user_id")
+@router.get("/user_id", response_model=PaginatedResponse)
 @require_auth
 async def list_vendors_by_user_id(
     request: Request,
@@ -46,8 +47,8 @@ async def list_vendors_by_user_id(
     db: AsyncSession = Depends(get_db),
 ):
     user = request.state.user
-    vendors = await VendorManager.get_vendors(db=db, user=user)
-    return vendors
+    paginated_vendors = await VendorManager.get_vendors(db=db, user=user)
+    return paginated_vendors
 
 
 @router.put("/update")

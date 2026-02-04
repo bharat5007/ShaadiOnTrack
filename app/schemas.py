@@ -211,8 +211,8 @@ class PaginatedResponse(BaseModel):
 
 
 class VendorQueryParams(BaseModel):
-    skip: int = Field(0, ge=0)
-    limit: int = Field(100, ge=1, le=100)
+    page: int = Field(0, ge=0)
+    page_size: int = Field(1, ge=1, le=100)
     service_name: Optional[str] = None
     service_id: Optional[int] = None
     name: Optional[str] = None
