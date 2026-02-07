@@ -1,0 +1,23 @@
+app/cache/registry.py
+  901d8dd68c2bd32c 92-93
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.0.37",
+  "base_commit_sha": "0cd8a17bd4aab03e9f88f37806007dcc9e3e6bda",
+  "prompts": {
+    "901d8dd68c2bd32c": {
+      "agent_id": {
+        "tool": "DeputyDev",
+        "id": "370715",
+        "model": "AUTO"
+      },
+      "human_author": "Bharat Goyal <bharat.goyal1@1mg.com>",
+      "messages": [],
+      "total_additions": 3,
+      "total_deletions": 1,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    }
+  }
+}
