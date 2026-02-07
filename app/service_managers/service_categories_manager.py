@@ -3,6 +3,8 @@ from sqlalchemy import select
 from app.models import ServiceCategory
 from app.schemas import ServiceCategoryCreate
 from app.cache.service_category import ServiceCategoryCache
+import logging
+logger = logging.getLogger(__name__)
 
 
 class ServiceCategoriesManagerAsync:
@@ -47,6 +49,7 @@ class ServiceCategoriesManagerAsync:
     @classmethod
     async def get_all_service_categories(cls, db: AsyncSession):
         cached_data = await ServiceCategoryCache.get_key("categories")
+        logger.info(f"CACHED DATA: {cached_data}")
         if cached_data:
             return cached_data
         stmt = select(ServiceCategory)
