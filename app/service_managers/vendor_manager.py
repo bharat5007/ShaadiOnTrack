@@ -8,6 +8,8 @@ from app.service.auth import AuthServiceClient
 from app.utils import SharedContext
 from typing import Optional
 
+import logging
+logger = logging.getLogger(__name__)
 
 class VendorManager:
     @classmethod
@@ -39,7 +41,7 @@ class VendorManager:
 
         service_id = service_category.id
 
-        new_category = Vendor(
+        new_vendor = Vendor(
             name=name,
             phone1=phone1,
             phone2=phone2,
@@ -53,29 +55,30 @@ class VendorManager:
             meta=metadata,
             service_category_id=service_id,
         )
-        db.add(new_category)
+        logger.warning(f"CREATE_VENDOR LOGS: {new_vendor}")
+        db.add(new_vendor)
 
         vendor_update_payload = {"phone": phone1}
         await AuthServiceClient.update_vendor_role(vendor_update_payload)
 
         await db.commit()
-        await db.refresh(new_category)
+        await db.refresh(new_vendor)
 
         # Return vendor data in same format as get_vendors
         return {
-            "id": new_category.id,
-            "name": new_category.name,
-            "phone1": new_category.phone1,
-            "phone2": new_category.phone2,
-            "city": new_category.city,
-            "district": new_category.district,
-            "address": new_category.address,
-            "lower_range": new_category.lower_range,
-            "upper_range": new_category.upper_range,
-            "email": new_category.email,
-            "meta": new_category.meta,
-            "created_at": new_category.created_at,
-            "updated_at": new_category.updated_at,
+            "id": new_vendor.id,
+            "name": new_vendor.name,
+            "phone1": new_vendor.phone1,
+            "phone2": new_vendor.phone2,
+            "city": new_vendor.city,
+            "district": new_vendor.district,
+            "address": new_vendor.address,
+            "lower_range": new_vendor.lower_range,
+            "upper_range": new_vendor.upper_range,
+            "email": new_vendor.email,
+            "meta": new_vendor.meta,
+            "created_at": new_vendor.created_at,
+            "updated_at": new_vendor.updated_at,
             "service_category": {
                 "id": service_category.id,
                 "name": service_category.name,
