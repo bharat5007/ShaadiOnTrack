@@ -36,6 +36,38 @@ class Settings(BaseSettings):
 
     SHARED_CONTEXT_SECRET: str = "1"
 
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+    REDIS_DB: int = 0
+    REDIS_PASSWORD: str = ""
+
+    # Use TLS when connecting to managed Redis (e.g., AWS ElastiCache Serverless)
+    # Set via env: REDIS_SSL=True
+    REDIS_SSL: bool = False
+
+    # Optional: provide a full URL (supports redis:// or rediss://)
+    # If set, this takes precedence over REDIS_HOST/REDIS_PORT/REDIS_DB.
+    REDIS_URL: str = "redis://localhost:6379/0"
+
+    # Redis Cache Hosts (Multi-instance support)
+    @property
+    def REDIS_CACHE_HOSTS(self) -> dict:
+        """
+        Multiple Redis cache configurations.
+        Can be overridden by environment variable as JSON string.
+        """
+        return {
+            "shaadi_on_track": {
+                "REDIS_HOST": self.REDIS_HOST,
+                "REDIS_PORT": self.REDIS_PORT,
+                "REDIS_DB": self.REDIS_DB,
+                "REDIS_PASSWORD": self.REDIS_PASSWORD,
+                "REDIS_SSL": self.REDIS_SSL,
+                "REDIS_URL": self.REDIS_URL,
+                "LABEL": "shaadi_on_track",
+            }
+        }
+
     # AWS S3 Configuration
     AWS_ACCESS_KEY_ID: str = ""
     AWS_SECRET_ACCESS_KEY: str = ""

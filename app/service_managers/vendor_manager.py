@@ -96,8 +96,7 @@ class VendorManager:
         limit = params.page_size if params else 1
         skip = params.page if params else 0
         if skip:
-            skip = (skip-1)*limit
-
+            skip = (skip - 1) * limit
 
         service_name = getattr(params, "service_name", None)
         name = getattr(params, "name", None)

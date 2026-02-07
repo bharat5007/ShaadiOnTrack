@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.models import ServiceCategory
 from app.schemas import ServiceCategoryCreate
+from app.cache.service_category import ServiceCategoryCache
 
 
 class ServiceCategoriesManagerAsync:
@@ -44,12 +45,28 @@ class ServiceCategoriesManagerAsync:
         return result.scalar_one_or_none()
 
     @classmethod
-    async def get_all_service_categories(
-        cls, db: AsyncSession, skip: int = 0, limit: int = 100
-    ):
-        stmt = select(ServiceCategory).offset(skip).limit(limit)
+    async def get_all_service_categories(cls, db: AsyncSession):
+        cached_data = await ServiceCategoryCache.get_key("categories")
+        if cached_data:
+            return cached_data
+        stmt = select(ServiceCategory)
         result = await db.execute(stmt)
-        return result.scalars().all()
+        result = result.scalars().all()
+
+        categories_data = [
+            {
+                "id": cat.id,
+                "name": cat.name,
+                "short_desc": cat.short_desc,
+                "description": cat.description,
+                "meta": cat.meta,
+                "percentage": cat.percentage,
+            }
+            for cat in result
+        ]
+
+        await ServiceCategoryCache.set_key("categories", categories_data, 1800)
+        return categories_data
 
     @classmethod
     async def delete_service_category(cls, db: AsyncSession, category_id: int):

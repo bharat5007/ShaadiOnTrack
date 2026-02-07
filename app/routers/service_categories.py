@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.schemas import ServiceCategoryCreate
@@ -13,7 +13,6 @@ router = APIRouter(prefix="/service-categories", tags=["service-categories"])
 async def create_service_category(
     payload: ServiceCategoryCreate,
     db: AsyncSession = Depends(get_db),
-    # current_user: dict = Depends(get_current_active_user)
 ):
     result = await ServiceCategoriesManagerAsync.create_service_category(db, payload)
     return result
@@ -21,14 +20,9 @@ async def create_service_category(
 
 @router.get("/")
 async def list_service_categories(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
-    # current_user: dict = Depends(get_current_active_user)
 ):
-    categories = await ServiceCategoriesManagerAsync.get_all_service_categories(
-        db, skip, limit
-    )
+    categories = await ServiceCategoriesManagerAsync.get_all_service_categories(db)
     return categories
 
 

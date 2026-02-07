@@ -8,6 +8,9 @@ from pydantic import BaseModel
 from fastapi import Request, HTTPException, status
 import jwt
 from app.config import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class SharedContext(BaseModel):
@@ -65,7 +68,7 @@ def decode_shared_context(encoded_context: str) -> Optional[SharedContext]:
 
         # Verify token type and issuer for additional security
         if payload.get("typ") != "shared-context" or payload.get("iss") != "sot-auth":
-            print(
+            logger.error(
                 f"ERROR: Invalid token type or issuer. typ={payload.get('typ')}, iss={payload.get('iss')}"
             )
             return None
@@ -83,7 +86,7 @@ def decode_shared_context(encoded_context: str) -> Optional[SharedContext]:
         return SharedContext(**shared_data)
     except Exception as e:
         # Log the error for debugging (remove in production)
-        print(f"Error decoding shared context: {e}")
+        logger.error(f"Error decoding shared context: {e}")
 
 
 def require_auth(func):

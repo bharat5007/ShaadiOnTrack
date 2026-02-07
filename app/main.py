@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.config import settings
 from app.database import engine, Base
+from app.cache import cache_registry
 from app.routers import (
     budget,
     service_categories,
@@ -12,10 +13,7 @@ from app.routers import (
 )
 import logging
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+# Get logger (Uvicorn already configures logging)
 logger = logging.getLogger(__name__)
 
 # Create FastAPI app
@@ -36,10 +34,10 @@ app.add_middleware(
 )
 
 
-# Create database tables
+# Create database tables and initialize Redis
 @app.on_event("startup")
 async def startup_event():
-    """Create database tables on startup."""
+    """Create database tables and initialize Redis cache registry on startup."""
     logger.info("Creating database tables...")
 
     # engine is AsyncEngine, so DDL must be executed via run_sync
@@ -47,6 +45,27 @@ async def startup_event():
         await conn.run_sync(Base.metadata.create_all)
 
     logger.info("Database tables created successfully!")
+
+    # Initialize Redis cache registry
+    try:
+        cache_registry.from_config(settings.REDIS_CACHE_HOSTS)
+        logger.info("Redis cache registry initialized successfully!")
+    except Exception as e:
+        logger.warning(
+            f"Redis cache registry initialization failed: {e}. Application will continue without Redis."
+        )
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Close connections on shutdown."""
+    logger.info("Shutting down application...")
+    try:
+        await cache_registry.close_all()
+        logger.info("Redis connections closed successfully!")
+    except Exception as e:
+        logger.error(f"Error closing Redis connections: {e}")
+    logger.info("Application shutdown complete!")
 
 
 # Health check endpoint
