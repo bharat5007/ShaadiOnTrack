@@ -49,9 +49,6 @@ class ServiceCategoriesManagerAsync:
     @classmethod
     async def get_all_service_categories(cls, db: AsyncSession):
         cached_data = await ServiceCategoryCache.get_key("categories")
-        logger.info(f"CACHED DATA: {cached_data}")
-        logger.warning(f"CACHED DATA: {cached_data}")
-        logger.error(f"CACHED DATA: {cached_data}")
         if cached_data:
             return cached_data
         stmt = select(ServiceCategory)
