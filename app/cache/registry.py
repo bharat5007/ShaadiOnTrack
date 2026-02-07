@@ -89,15 +89,17 @@ class CacheRegistry:
                 f"{config.get('REDIS_DB', 0)}"
             )
 
-        connection = await aioredis.from_url(
+        # NOTE: redis.asyncio.from_url() returns a Redis client instance (not a coroutine).
+        # Do NOT await it. Only Redis commands like ping/get/set are awaited.
+        connection = aioredis.from_url(
             redis_url,
-            password=config.get("REDIS_PASSWORD") or None,
             decode_responses=True,
             socket_connect_timeout=5,
             socket_timeout=5,
             socket_keepalive=True,
             health_check_interval=30,
             retry_on_timeout=True,
+            ssl_cert_reqs=None,
         )
 
         # Test connection
