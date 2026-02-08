@@ -9,7 +9,9 @@ from app.utils import SharedContext
 from typing import Optional
 
 import logging
+
 logger = logging.getLogger(__name__)
+
 
 class VendorManager:
     @classmethod
@@ -147,10 +149,10 @@ class VendorManager:
             query = query.filter(Vendor.username == user_id)
 
         if city:
-            query = query.filter(Vendor.city == city)
+            query = query.filter(Vendor.city.in_(city))
 
         if district:
-            query = query.filter(Vendor.district == district)
+            query = query.filter(Vendor.district.in_(district))
 
         if min_price:
             query = query.filter(Vendor.lower_range == int(min_price))

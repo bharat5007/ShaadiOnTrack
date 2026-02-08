@@ -27,11 +27,11 @@ async def create_vendor(
     return result
 
 
-@router.get("/", response_model=PaginatedResponse)
+@router.post("/fetch", response_model=PaginatedResponse)
 # @require_auth
 async def list_vendors(
     request: Request,
-    params: VendorQueryParams = Depends(),
+    params: VendorQueryParams,
     db: AsyncSession = Depends(get_db),
 ):
     # user = request.state.user

@@ -218,8 +218,8 @@ class VendorQueryParams(BaseModel):
     name: Optional[str] = None
     vendor_id: Optional[int] = None
     user_id: Optional[str] = None
-    city: Optional[str] = None
-    district: Optional[str] = None
+    city: Optional[List[str]] = None
+    district: Optional[List[str]] = None
     min_price: Optional[str] = None
     max_price: Optional[str] = None
 
