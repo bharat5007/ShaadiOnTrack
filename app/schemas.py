@@ -41,7 +41,7 @@ class WeddingCoreResponse(WeddingCoreBase):
 class CreateBudgetCategories(BaseModel):
     name: str
     total_amt: int
-    actual_cost: Optional[int] = 0
+    actual_amt: int
     meta: Optional[dict]
     pass
 
@@ -55,8 +55,14 @@ class UpdateBudgetCategory(BaseModel):
 
 class CreateBudget(BaseModel):
     total_budget: int
+    name: Optional[str] = "Budget"
+    budget_categories: list[CreateBudgetCategories]
+
+
+class UpdateBudget(BaseModel):
+    total_budget: int
     name: str
-    categories: list[CreateBudgetCategories]
+    budget_categories: list[CreateBudgetCategories]
 
 
 # Budget Category Schemas

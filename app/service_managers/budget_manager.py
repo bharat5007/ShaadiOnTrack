@@ -4,10 +4,39 @@ from app.models import Budget, BudgetCategory
 from fastapi import HTTPException, status
 from sqlalchemy.orm import selectinload
 from app.utils import SharedContext
-from app.schemas import CreateBudget, CreateBudgetCategories, UpdateBudgetCategory
+from app.schemas import (
+    CreateBudget,
+    CreateBudgetCategories,
+    UpdateBudgetCategory,
+    UpdateBudget,
+)
 
 
 class BudgetManager:
+    @staticmethod
+    def _format_budget_response(budget: Budget) -> dict:
+        """Helper method to format budget response consistently."""
+        return {
+            "id": budget.id,
+            "user_id": budget.user_id,
+            "name": budget.name,
+            "total_budget": budget.total_budget,
+            "spent_budget": budget.spent_budget,
+            "remaining_budget": budget.total_budget - budget.spent_budget,
+            "budget_categories": [
+                {
+                    "id": category.id,
+                    "name": category.name,
+                    "total_amt": category.total_amt,
+                    "actual_amt": category.actual_cost,
+                    "remaining": category.total_amt - category.actual_cost,
+                    "meta": category.meta,
+                }
+                for category in budget.budget_categories
+            ],
+            "categories_count": len(budget.budget_categories),
+        }
+
     @classmethod
     async def create_budget(
         cls, db: AsyncSession, payload: CreateBudget, user: SharedContext
@@ -25,13 +54,24 @@ class BudgetManager:
 
         budget_id = new_budget.id
 
-        for categories in payload.categories:
+        for categories in payload.budget_categories:
             await cls.create_budget_categories(db, categories, budget_id)
-            budget_spend += categories.actual_cost if categories.actual_cost else 0
+            budget_spend += categories.actual_amt
 
         new_budget.spent_budget = budget_spend
         await db.commit()
-        await db.refresh(Budget)
+        await db.refresh(new_budget)
+
+        # Fetch the budget with categories to return complete response
+        query = (
+            select(Budget)
+            .options(selectinload(Budget.budget_categories))
+            .filter(Budget.id == budget_id)
+        )
+        result = await db.execute(query)
+        budget_with_categories = result.scalar_one()
+
+        return cls._format_budget_response(budget_with_categories)
 
     @classmethod
     async def create_budget_categories(
@@ -39,7 +79,7 @@ class BudgetManager:
     ):
         name = payload.name
         total_amt = payload.total_amt
-        actual_cost = payload.actual_cost
+        actual_cost = payload.actual_amt
         meta = payload.meta
 
         new_budget_cat = BudgetCategory(
@@ -53,6 +93,53 @@ class BudgetManager:
         db.add(new_budget_cat)
         await db.commit()
         await db.refresh(new_budget_cat)
+        return actual_cost or 0
+
+    @classmethod
+    async def update_budget_by_id(
+        cls, db: AsyncSession, payload: UpdateBudget, id: int, user: SharedContext
+    ):
+        user_id = user.user_id
+
+        # Fetch the budget with its categories
+        query = select(Budget).options(selectinload(Budget.budget_categories))
+        query = query.filter(Budget.id == id, Budget.user_id == user_id)
+        result = await db.execute(query)
+        budget = result.scalar_one_or_none()
+
+        if not budget:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Budget not found"
+            )
+
+        budget.name = payload.name
+        budget.total_budget = payload.total_budget
+
+        for existing_category in budget.budget_categories:
+            await db.delete(existing_category)
+
+        await db.flush()
+
+        budget_spend = 0
+        for categories in payload.budget_categories:
+            await cls.create_budget_categories(db, categories, id)
+            budget_spend += categories.actual_amt
+
+        budget.spent_budget = budget_spend
+
+        await db.commit()
+        await db.refresh(budget)
+
+        # Fetch the budget with categories to return complete response
+        query = (
+            select(Budget)
+            .options(selectinload(Budget.budget_categories))
+            .filter(Budget.id == id)
+        )
+        result = await db.execute(query)
+        budget_with_categories = result.scalar_one()
+
+        return cls._format_budget_response(budget_with_categories)
 
     @classmethod
     async def update_budget_categories(
@@ -74,7 +161,6 @@ class BudgetManager:
 
         query = (
             select(Budget)
-            .options(selectinload(Budget.budget_categories))
             .filter(Budget.user_id == user_id)
             .order_by(Budget.created_at.desc())
         )
@@ -86,23 +172,7 @@ class BudgetManager:
         for budget in budgets:
             budget_dict = {
                 "id": budget.id,
-                "user_id": budget.user_id,
                 "name": budget.name,
-                "total_budget": budget.total_budget,
-                "spent_budget": budget.spent_budget,
-                "remaining_budget": budget.total_budget - budget.spent_budget,
-                "budget_categories": [
-                    {
-                        "id": category.id,
-                        "name": category.name,
-                        "total_amt": category.total_amt,
-                        "actual_cost": category.actual_cost,
-                        "remaining": category.total_amt - category.actual_cost,
-                        "meta": category.meta,
-                    }
-                    for category in budget.budget_categories
-                ],
-                "categories_count": len(budget.budget_categories),
             }
             budgets_with_categories.append(budget_dict)
 
@@ -130,31 +200,7 @@ class BudgetManager:
                 detail=f"Budget with ID {id} not found",
             )
 
-        budget_dict = {
-            "id": budget.id,
-            "user_id": budget.user_id,
-            "name": budget.name,
-            "total_budget": budget.total_budget,
-            "spent_budget": budget.spent_budget,
-            "remaining_budget": (budget.total_budget or 0) - (budget.spent_budget or 0),
-            "created_at": budget.created_at,
-            "updated_at": budget.updated_at,
-            "budget_categories": [
-                {
-                    "id": category.id,
-                    "budget_cat": category.budget_cat,
-                    "budget_amt": category.budget_amt,
-                    "actual_cost": category.actual_cost,
-                    "remaining": category.remaining,
-                    "created_at": category.created_at,
-                    "updated_at": category.updated_at,
-                }
-                for category in budget.budget_categories
-            ],
-            "categories_count": len(budget.budget_categories),
-        }
-
-        return budget_dict
+        return cls._format_budget_response(budget)
 
     @classmethod
     async def delete_budget(cls, db: AsyncSession, id: int):

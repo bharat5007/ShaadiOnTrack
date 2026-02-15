@@ -152,3 +152,56 @@ def require_role(*allowed_roles: str):
         return wrapper
 
     return decorator
+
+
+def optional_auth(default_return=None):
+    """
+    Decorator for optional authentication that returns a default value on auth failure.
+
+    Args:
+        default_return: The value to return when authentication fails (default: None)
+
+    Usage:
+        @optional_auth(default_return=[])
+        async def my_endpoint(request: Request, ...):
+            # request.state.user will be available if auth succeeds
+            pass
+    """
+
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(request: Request, *args, **kwargs):
+            # Extract Authorization header
+            auth_header = request.headers.get("Authorization", "")
+            if not auth_header.startswith("Bearer "):
+                return default_return
+
+            token = auth_header[7:]
+
+            # Check token expiration
+            if is_token_expired(token):
+                return default_return
+
+            # Extract shared context
+            context_header = request.headers.get("X-Shared-Context", "")
+            if not context_header:
+                return default_return
+
+            try:
+                shared_context = decode_shared_context(context_header)
+                if not shared_context:
+                    return default_return
+
+                # Attach to request state for use in route
+                request.state.user = shared_context
+                request.state.token_payload = decode_jwt_payload(token)
+
+                # Call the original function with authenticated user
+                return await func(request, *args, **kwargs)
+            except Exception:
+                # Return default value on any authentication error
+                return default_return
+
+        return wrapper
+
+    return decorator
