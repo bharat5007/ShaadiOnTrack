@@ -41,7 +41,7 @@ class S3Manager:
         vendor_id = vendor.id
         # Create organized key path
         unique_id = uuid.uuid4().hex[:8]
-        key = f"vendors/{vendor_id}/portfolio/{unique_id}_{file_name}"
+        key = f"vendors/{vendor_id}/portfolio/original/{unique_id}_{file_name}"
 
         url = cls.s3_client.generate_presigned_url(
             "put_object",
